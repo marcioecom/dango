@@ -6,7 +6,7 @@ This repository is the successor to the Python `anki-automator` CLI. The CLI rem
 
 ## Current status
 
-The repository contains the agreed product specification and an empty monorepo scaffold. Application packages will be created incrementally while implementing the issues in the [anki-miner Linear project](https://linear.app/leapstark/project/anki-miner-edaa39ba53b2).
+The first authenticated vertical slice is implemented. Allowed users can create and verify an account, sign in through the Tauri desktop, restore a signed session from the macOS Keychain, and revoke it remotely on logout. Remaining product capabilities continue to be introduced incrementally through the [anki-miner Linear project](https://linear.app/leapstark/project/anki-miner-edaa39ba53b2).
 
 ## Planned structure
 
@@ -32,4 +32,12 @@ Read `PRODUCT.md`, `SPEC.md`, and `docs/adr/` before implementation.
 - Remote persistence: Postgres
 - Local desktop persistence: SQLite
 
-No app dependencies have been installed yet. Each package should be created when its first vertical slice requires it.
+## Local authentication flow
+
+1. Copy the variables from `apps/web/.env.example` to `apps/web/.env.local` and fill in real secrets and allowed emails.
+2. Copy `apps/desktop/.env.example` to `apps/desktop/.env` when the API is not at the default local URL.
+3. Run `pnpm db:up` and `pnpm db:migrate`.
+4. Run the API with `pnpm --filter @anki-miner/web dev`.
+5. Run the native desktop with `pnpm dev:desktop`.
+
+Use `pnpm check` and `pnpm test` to verify the complete workspace. Backend integration tests require Docker.
