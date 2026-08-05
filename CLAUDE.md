@@ -16,9 +16,15 @@ Read these sources before changing code, in this order:
 - Keep provider credentials out of desktop and browser bundles.
 - Preserve offline captures and completed review decisions across failures.
 - Make network and Anki delivery operations idempotent.
-- Keep all user-facing copy in Brazilian Portuguese.
+- Keep all user-facing copy localized in Brazilian Portuguese and English.
 - Maintain keyboard accessibility and system light/dark theme support.
 - Record a new ADR when an implementation requires changing an accepted architectural decision.
+
+## TypeScript organization
+
+- Follow the feature-module organization established in the Echo reference project.
+- Use React Query for remote server state, React Hook Form with Zod for forms, and the Better Auth `authClient` for Better Auth endpoints.
+- Keep custom HTTP and WebSocket transport adapters separate from feature hooks for routes not owned by Better Auth.
 
 ## Repository state
 

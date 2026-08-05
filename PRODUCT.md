@@ -6,7 +6,7 @@ product
 
 ## Purpose
 
-Anki Miner helps English learners turn words, expressions, and original sentences found during immersion into reviewed Anki cards with minimal repetitive work. It combines fast capture, AI-assisted sentence generation, text-to-speech audio, and reliable delivery to a local Anki installation.
+Dango helps English learners turn words, expressions, and original sentences found during immersion into reviewed Anki cards with minimal repetitive work. It combines fast capture, AI-assisted sentence generation, text-to-speech audio, and reliable delivery to a local Anki installation.
 
 The product also supports a consistent mining routine through small daily goals, resumable sessions, and reminders that only appear when work is pending.
 
@@ -55,6 +55,9 @@ There are no shared queues or shared progress.
 - Mobile capture: installable PWA opened from the iPhone home screen.
 - Motion communicates state and never delays the task.
 - Errors explain what happened and what the user can do next.
+- The visual language is calm and precise, with restrained references to Japanese craft rather than kawaii or confectionery themes.
+- Yomogi green identifies primary actions and selection; azuki red is reserved for the brand and rare emphasis.
+- Shared tokens and primitives keep the desktop and PWA visually consistent without sharing product-specific screens.
 
 ## Card format
 
