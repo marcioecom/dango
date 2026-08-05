@@ -6,7 +6,7 @@ import { resources } from "./resources";
 export const supportedLocales = ["pt-BR", "en"] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
-const LANGUAGE_STORAGE_KEY = "anki-miner.language";
+const LANGUAGE_STORAGE_KEY = "dango.language";
 
 export function normalizeLocale(language: string | null | undefined): SupportedLocale | null {
   if (!language) return null;

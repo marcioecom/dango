@@ -162,7 +162,7 @@ describe("desktop authentication", () => {
     await user.selectOptions(screen.getByLabelText("Idioma"), "en");
 
     expect(await screen.findByRole("heading", { name: "Sign in to Dango" })).toBeVisible();
-    expect(window.localStorage.getItem("anki-miner.language")).toBe("en");
+    expect(window.localStorage.getItem("dango.language")).toBe("en");
     expect(document.documentElement.lang).toBe("en");
   });
 

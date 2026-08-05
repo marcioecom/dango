@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-const SERVICE: &str = "com.leapstark.ankiminer";
+const SERVICE: &str = "com.leapstark.dango";
 const ACCOUNT: &str = "desktop-session";
 
 #[derive(Debug, Serialize, PartialEq)]
