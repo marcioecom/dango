@@ -118,7 +118,7 @@ describe("desktop authentication", () => {
     );
     expect(deleteSessionToken).toHaveBeenCalled();
     expect(authClient.signOut).toHaveBeenCalled();
-    expect(screen.getByRole("heading", { name: "Entrar no Anki Miner" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Entrar no Dango" })).toBeVisible();
   });
 
   it("preserva o erro original quando a revogação compensatória falha", async () => {
@@ -151,17 +151,17 @@ describe("desktop authentication", () => {
 
     await waitFor(() => expect(authClient.signOut).toHaveBeenCalled());
     expect(deleteSessionToken).toHaveBeenCalled();
-    expect(await screen.findByRole("heading", { name: "Entrar no Anki Miner" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Entrar no Dango" })).toBeVisible();
   });
 
   it("troca para inglês e persiste a escolha", async () => {
     const user = userEvent.setup();
     renderWithProviders(<AuthView />);
 
-    await screen.findByRole("heading", { name: "Entrar no Anki Miner" });
+    await screen.findByRole("heading", { name: "Entrar no Dango" });
     await user.selectOptions(screen.getByLabelText("Idioma"), "en");
 
-    expect(await screen.findByRole("heading", { name: "Sign in to Anki Miner" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Sign in to Dango" })).toBeVisible();
     expect(window.localStorage.getItem("anki-miner.language")).toBe("en");
     expect(document.documentElement.lang).toBe("en");
   });

@@ -1,3 +1,6 @@
+import { BrandMark } from "@dango/ui/components/brand-mark";
+import { Button } from "@dango/ui/components/button";
+import { Skeleton } from "@dango/ui/components/skeleton";
 import { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -24,21 +27,28 @@ export function AuthView() {
   }
 
   return (
-    <main className="app-shell">
-      <aside className="context-panel">
-        <div className="wordmark">
-          <span aria-hidden="true">AM</span> Anki Miner
+    <main className="min-h-svh lg:grid lg:grid-cols-[minmax(19rem,0.8fr)_minmax(30rem,1.2fr)]">
+      <aside className="flex border-b border-border bg-secondary p-5 lg:min-h-svh lg:flex-col lg:border-r lg:border-b-0 lg:p-9">
+        <div className="flex w-full items-center justify-between gap-4 lg:block">
+          <div className="flex items-center gap-2.5 font-semibold tracking-[-0.02em]">
+            <BrandMark className="size-8" />
+            <span>Dango</span>
+          </div>
+          <LanguageSelector />
         </div>
-        <LanguageSelector />
-        <div className="context-copy">
-          <p>{t("brand.topic")}</p>
-          <h1>{t("brand.tagline")}</h1>
-          <p className="supporting-copy">{t("brand.supporting")}</p>
+        <div className="my-auto hidden max-w-lg lg:block">
+          <p className="mb-3 text-sm font-semibold text-primary">{t("brand.topic")}</p>
+          <h1 className="max-w-[15ch] text-[2.5rem] leading-[1.08] font-semibold tracking-[-0.04em] text-balance">
+            {t("brand.tagline")}
+          </h1>
+          <p className="mt-6 max-w-[44ch] leading-7 text-pretty text-muted-foreground">
+            {t("brand.supporting")}
+          </p>
         </div>
-        <p className="privacy-note">{t("brand.privacy")}</p>
+        <p className="hidden text-xs text-muted-foreground lg:block">{t("brand.privacy")}</p>
       </aside>
 
-      <section className="task-panel">
+      <section className="flex min-h-[calc(100svh-5rem)] items-center justify-center p-6 sm:p-10 lg:min-h-svh lg:p-16">
         {session.isPending ? <Restoring /> : null}
         {session.isError ? <RestoreError error={session.error} onRetry={session.refetch} /> : null}
         {session.data ? <AccountView user={session.data} /> : null}
@@ -46,29 +56,38 @@ export function AuthView() {
           <Verification onReturn={() => selectMode("sign-in")} />
         ) : null}
         {session.isSuccess && !session.data && !isAwaitingVerification ? (
-          <div className="form-view">
+          <div className="w-full max-w-md">
             <div>
-              <p className="section-label">{t("auth.privateAccount")}</p>
-              <h2>{t(mode === "sign-up" ? "signUp.title" : "login.title")}</h2>
-              <p className="description">
+              <p className="mb-3 text-sm font-semibold text-primary">{t("auth.privateAccount")}</p>
+              <h2 className="text-2xl font-semibold tracking-[-0.03em] text-balance">
+                {t(mode === "sign-up" ? "signUp.title" : "login.title")}
+              </h2>
+              <p className="mt-3 max-w-[46ch] leading-7 text-pretty text-muted-foreground">
                 {t(mode === "sign-up" ? "signUp.description" : "login.description")}
               </p>
             </div>
-            <div className="mode-switch" aria-label={t("auth.modeLabel")}>
-              <button
+            <div
+              className="my-7 grid grid-cols-2 gap-1 rounded-lg bg-secondary p-1"
+              aria-label={t("auth.modeLabel")}
+            >
+              <Button
                 aria-pressed={mode === "sign-in"}
+                className="h-9 aria-pressed:bg-background aria-pressed:text-foreground aria-pressed:shadow-[0_1px_4px_color-mix(in_oklch,var(--foreground)_12%,transparent)]"
                 onClick={() => selectMode("sign-in")}
                 type="button"
+                variant="ghost"
               >
                 {t("login.submit")}
-              </button>
-              <button
+              </Button>
+              <Button
                 aria-pressed={mode === "sign-up"}
+                className="h-9 aria-pressed:bg-background aria-pressed:text-foreground aria-pressed:shadow-[0_1px_4px_color-mix(in_oklch,var(--foreground)_12%,transparent)]"
                 onClick={() => selectMode("sign-up")}
                 type="button"
+                variant="ghost"
               >
                 {t("signUp.submit")}
-              </button>
+              </Button>
             </div>
             {mode === "sign-up" ? (
               <SignUpForm onSuccess={() => setIsAwaitingVerification(true)} />
@@ -85,9 +104,9 @@ export function AuthView() {
 function Restoring() {
   const { t } = useTranslation();
   return (
-    <div className="status-view" role="status">
-      <div className="skeleton-line skeleton-title" />
-      <div className="skeleton-line" />
+    <div className="w-full max-w-md" role="status">
+      <Skeleton className="mb-4 h-7 w-1/2" />
+      <Skeleton className="h-3.5 w-3/4" />
       <span className="sr-only">{t("restoring")}</span>
     </div>
   );
@@ -96,13 +115,17 @@ function Restoring() {
 function RestoreError({ error, onRetry }: { error: Error; onRetry: () => unknown }) {
   const { t } = useTranslation();
   return (
-    <div className="status-view">
-      <p className="section-label">{t("restore.status")}</p>
-      <h2>{t("restore.title")}</h2>
-      <p className="description">{t(errorKey(error, "errors.restore"))}</p>
-      <button className="primary-button" onClick={onRetry} type="button">
+    <div className="w-full max-w-md">
+      <p className="mb-3 text-sm font-semibold text-primary">{t("restore.status")}</p>
+      <h2 className="text-2xl font-semibold tracking-[-0.03em] text-balance">
+        {t("restore.title")}
+      </h2>
+      <p className="mt-3 max-w-[46ch] leading-7 text-pretty text-muted-foreground">
+        {t(errorKey(error, "errors.restore"))}
+      </p>
+      <Button className="mt-7" onClick={onRetry} type="button">
         {t("restore.retry")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -110,15 +133,21 @@ function RestoreError({ error, onRetry }: { error: Error; onRetry: () => unknown
 function Verification({ onReturn }: { onReturn: () => void }) {
   const { t } = useTranslation();
   return (
-    <div className="status-view">
-      <div className="success-mark" aria-hidden="true">
-        @
+    <div className="w-full max-w-md">
+      <div className="mb-7 grid size-11 place-items-center rounded-full bg-success text-success-foreground" aria-hidden="true">
+        <svg viewBox="0 0 20 20" className="size-5" fill="none">
+          <path d="m5 10 3 3 7-7" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+        </svg>
       </div>
-      <h2>{t("verification.title")}</h2>
-      <p className="description">{t("verification.description")}</p>
-      <button className="primary-button" onClick={onReturn} type="button">
+      <h2 className="text-2xl font-semibold tracking-[-0.03em] text-balance">
+        {t("verification.title")}
+      </h2>
+      <p className="mt-3 max-w-[46ch] leading-7 text-pretty text-muted-foreground">
+        {t("verification.description")}
+      </p>
+      <Button className="mt-7" onClick={onReturn} type="button">
         {t("verification.return")}
-      </button>
+      </Button>
     </div>
   );
 }

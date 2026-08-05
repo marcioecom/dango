@@ -1,14 +1,14 @@
 {
-  "name": "anki-miner",
+  "name": "dango",
   "private": true,
   "packageManager": "pnpm@10.11.0",
   "scripts": {
     "build": "pnpm -r --if-present build",
     "check": "pnpm -r --if-present check",
-    "db:migrate": "pnpm --filter @anki-miner/web db:migrate",
+    "db:migrate": "pnpm --filter @dango/web db:migrate",
     "db:up": "docker compose up -d postgres",
     "dev": "pnpm -r --parallel --if-present dev",
-    "dev:desktop": "pnpm --filter @anki-miner/desktop tauri dev",
+    "dev:desktop": "pnpm --filter @dango/desktop tauri dev",
     "test": "pnpm -r --if-present test"
   }
 }

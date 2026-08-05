@@ -1,9 +1,9 @@
+import "@dango/ui/globals.css";
 import type { Metadata } from "next";
-import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Anki Miner",
-  description: "Confirmação de conta do Anki Miner",
+  title: "Dango",
+  description: "Capture expressões e transforme-as em cards revisados.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

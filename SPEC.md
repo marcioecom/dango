@@ -1,12 +1,12 @@
-# Anki Miner Specification
+# Dango Specification
 
 ## Status
 
-Baseline specification approved from the migration planning conversation. Implementation is tracked in the [anki-miner Linear project](https://linear.app/leapstark/project/anki-miner-edaa39ba53b2).
+Baseline specification approved from the migration planning conversation. Implementation is tracked in the [Dango Linear project](https://linear.app/leapstark/project/dango-edaa39ba53b2).
 
 ## Scope
 
-Anki Miner is a new project replacing the daily workflow of the Python `anki-automator` CLI. The first usable delivery is a macOS desktop app plus a shared backend. An installable iPhone PWA follows after the desktop beta is validated.
+Dango is a new project replacing the daily workflow of the Python `anki-automator` CLI. The first usable delivery is a macOS desktop app plus a shared backend. An installable iPhone PWA follows after the desktop beta is validated.
 
 The existing Python repository remains unchanged as reference and fallback. This repository does not need to preserve its internal architecture or file formats beyond the explicit pending-item import.
 
@@ -223,7 +223,7 @@ Model comparison measures structured-output validity, naturalness, correct targe
 - Windows or Linux support.
 - Direct mobile-to-Anki delivery.
 - Full card-template customization.
-- Anki review or scheduling inside Anki Miner.
+- Anki review or scheduling inside Dango.
 - Global desktop capture shortcut in the first release.
 - Levels, achievements, or heavy gamification.
 - Maintaining the Python CLI as a second active implementation.

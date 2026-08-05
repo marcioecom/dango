@@ -1,7 +1,7 @@
 export const enTranslation = {
   translation: {
     account: {
-      description: "Your account is ready to use Anki Miner.",
+      description: "Your account is ready to use Dango.",
       email: "Email",
       greeting: "Hello, {{name}}",
       logout: "Sign out",
@@ -47,7 +47,7 @@ export const enTranslation = {
       description: "Continue where you left off on your Mac.",
       submit: "Sign in",
       submitting: "Signing in...",
-      title: "Sign in to Anki Miner",
+      title: "Sign in to Dango",
     },
     restore: {
       description: "Your session remains stored on this Mac.",

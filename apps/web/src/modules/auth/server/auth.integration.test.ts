@@ -1,4 +1,4 @@
-import { parseIdentityResponse } from "@anki-miner/api-client";
+import { parseIdentityResponse } from "@dango/api-client";
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { eq } from "drizzle-orm";
 import { migrate } from "drizzle-orm/postgres-js/migrator";

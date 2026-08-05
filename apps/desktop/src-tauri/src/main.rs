@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    anki_miner_desktop_lib::run()
+    dango_desktop_lib::run()
 }

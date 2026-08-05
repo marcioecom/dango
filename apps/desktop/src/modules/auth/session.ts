@@ -1,4 +1,4 @@
-import type { AuthenticatedUser } from "@anki-miner/api-client";
+import type { AuthenticatedUser } from "@dango/api-client";
 import { z } from "zod";
 
 import { authClient } from "../../lib/auth-client";

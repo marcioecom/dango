@@ -1,4 +1,4 @@
-import type { AuthenticatedUser, IdentityResponse } from "@anki-miner/api-client";
+import type { AuthenticatedUser, IdentityResponse } from "@dango/api-client";
 
 import { withCors } from "@/lib/cors";
 

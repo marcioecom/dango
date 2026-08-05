@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Anki Miner",
+  "productName": "Dango",
   "version": "0.1.0",
   "identifier": "com.leapstark.ankiminer",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Anki Miner",
+        "title": "Dango",
         "width": 920,
         "height": 680,
         "minWidth": 620,
@@ -26,6 +26,11 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "macOS": {
+      "dmg": {
+        "background": "./images/installer.png"
+      }
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

@@ -1,4 +1,4 @@
-# anki-miner
+# Dango
 
 Desktop-first tool for capturing English words and expressions, reviewing AI-generated example sentences, generating audio, and delivering approved cards to a local Anki installation.
 
@@ -6,7 +6,7 @@ This repository is the successor to the Python `anki-automator` CLI. The CLI rem
 
 ## Current status
 
-The first authenticated vertical slice is implemented. Allowed users can create and verify an account, sign in through the Tauri desktop, restore a signed session from the macOS Keychain, and revoke it remotely on logout. Remaining product capabilities continue to be introduced incrementally through the [anki-miner Linear project](https://linear.app/leapstark/project/anki-miner-edaa39ba53b2).
+The first authenticated vertical slice is implemented. Allowed users can create and verify an account, sign in through the Tauri desktop, restore a signed session from the macOS Keychain, and revoke it remotely on logout. Remaining product capabilities continue to be introduced incrementally through the [Dango Linear project](https://linear.app/leapstark/project/dango-edaa39ba53b2).
 
 ## Planned structure
 
@@ -37,7 +37,7 @@ Read `PRODUCT.md`, `SPEC.md`, and `docs/adr/` before implementation.
 1. Copy the variables from `apps/web/.env.example` to `apps/web/.env.local` and fill in real secrets and allowed emails.
 2. Copy `apps/desktop/.env.example` to `apps/desktop/.env` when the API is not at the default local URL.
 3. Run `pnpm db:up` and `pnpm db:migrate`.
-4. Run the API with `pnpm --filter @anki-miner/web dev`.
+4. Run the API with `pnpm --filter @dango/web dev`.
 5. Run the native desktop with `pnpm dev:desktop`.
 
 Use `pnpm check` and `pnpm test` to verify the complete workspace. Backend integration tests require Docker.

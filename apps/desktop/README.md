@@ -1,4 +1,4 @@
-# Anki Miner desktop
+# Dango desktop
 
 Tauri 2 desktop application for macOS. React owns the authentication interface and Rust persists one signed Better Auth session token in the macOS Keychain.
 
@@ -15,6 +15,6 @@ The Content Security Policy currently allows the local API origin. Add the deplo
 ## Verification
 
 ```bash
-pnpm --filter @anki-miner/desktop check
-pnpm --filter @anki-miner/desktop test
+pnpm --filter @dango/desktop check
+pnpm --filter @dango/desktop test
 ```

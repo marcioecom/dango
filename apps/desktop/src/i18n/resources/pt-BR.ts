@@ -1,7 +1,7 @@
 export const ptBrTranslation = {
   translation: {
     account: {
-      description: "Sua conta está pronta para usar o Anki Miner.",
+      description: "Sua conta está pronta para usar o Dango.",
       email: "Email",
       greeting: "Olá, {{name}}",
       logout: "Sair desta conta",
@@ -48,7 +48,7 @@ export const ptBrTranslation = {
       description: "Continue de onde você parou no seu Mac.",
       submit: "Entrar",
       submitting: "Entrando...",
-      title: "Entrar no Anki Miner",
+      title: "Entrar no Dango",
     },
     restore: {
       description: "Sua sessão continua salva neste Mac.",

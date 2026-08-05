@@ -23,7 +23,7 @@ type CreateAuthOptions = {
 
 export function createAuth(options: CreateAuthOptions) {
   return betterAuth({
-    appName: "Anki Miner",
+    appName: "Dango",
     baseURL: options.baseUrl,
     database: drizzleAdapter(options.db, {
       provider: "pg",

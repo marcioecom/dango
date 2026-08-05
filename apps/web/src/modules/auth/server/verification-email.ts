@@ -26,9 +26,9 @@ export function createResendVerificationEmailSender(options: {
     const { error } = await resend.emails.send({
       from: options.from,
       to: email,
-      subject: "Confirme seu email no Anki Miner",
-      html: `<p>Confirme seu endereço para entrar no Anki Miner.</p><p><a href="${safeUrl}">Confirmar meu email</a></p><p>Se você não iniciou este cadastro, ignore esta mensagem.</p>`,
-      text: `Confirme seu endereço para entrar no Anki Miner: ${url}\n\nSe você não iniciou este cadastro, ignore esta mensagem.`,
+      subject: "Confirme seu email no Dango",
+      html: `<p>Confirme seu endereço para entrar no Dango.</p><p><a href="${safeUrl}">Confirmar meu email</a></p><p>Se você não iniciou este cadastro, ignore esta mensagem.</p>`,
+      text: `Confirme seu endereço para entrar no Dango: ${url}\n\nSe você não iniciou este cadastro, ignore esta mensagem.`,
     });
 
     if (error) {

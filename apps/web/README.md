@@ -1,4 +1,4 @@
-# Anki Miner web
+# Dango web
 
 Next.js API that owns authentication and remote data. The current slice provides private email-and-password accounts through Better Auth, Postgres persistence, a server-side allowlist, Resend verification, signed bearer sessions for Tauri, and an authenticated identity endpoint.
 
@@ -11,7 +11,7 @@ Run migrations before starting the API:
 ```bash
 pnpm db:up
 pnpm db:migrate
-pnpm --filter @anki-miner/web dev
+pnpm --filter @dango/web dev
 ```
 
 `AUTH_TRUSTED_ORIGINS` must explicitly contain the Vite development origin and the production Tauri origin. The allowlist stays exclusively on the server.
@@ -19,8 +19,8 @@ pnpm --filter @anki-miner/web dev
 ## Verification
 
 ```bash
-pnpm --filter @anki-miner/web check
-pnpm --filter @anki-miner/web test
+pnpm --filter @dango/web check
+pnpm --filter @dango/web test
 ```
 
 Integration tests start an isolated Postgres container and do not call Resend.

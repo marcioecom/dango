@@ -1,5 +1,5 @@
 {
-  "name": "@anki-miner/web",
+  "name": "@dango/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,7 +13,8 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
-    "@anki-miner/api-client": "workspace:*",
+    "@dango/api-client": "workspace:*",
+    "@dango/ui": "workspace:*",
     "@better-auth/drizzle-adapter": "^1.6.26",
     "@vercel/functions": "^3.7.7",
     "better-auth": "1.6.26",

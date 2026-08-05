@@ -1,3 +1,6 @@
+import { Button } from "@dango/ui/components/button";
+import { Input } from "@dango/ui/components/input";
+import { Label } from "@dango/ui/components/label";
 import { useTranslation } from "react-i18next";
 
 import { useSignUpForm } from "../../hooks/use-sign-up-form";
@@ -12,10 +15,11 @@ export function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
     : null;
 
   return (
-    <form noValidate onSubmit={form.handleSubmit(onSubmit)}>
-      <label>
-        {t("fields.name")}
-        <input
+    <form className="flex flex-col gap-5" noValidate onSubmit={form.handleSubmit(onSubmit)}>
+      <div className="grid gap-2">
+        <Label htmlFor="sign-up-name">{t("fields.name")}</Label>
+        <Input
+          id="sign-up-name"
           aria-describedby={errors.name ? "sign-up-name-error" : undefined}
           aria-invalid={Boolean(errors.name)}
           autoComplete="name"
@@ -23,14 +27,15 @@ export function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
           {...form.register("name")}
         />
         {errors.name?.message ? (
-          <span className="field-error" id="sign-up-name-error">
+          <span className="text-xs font-medium text-destructive" id="sign-up-name-error">
             {t(errors.name.message)}
           </span>
         ) : null}
-      </label>
-      <label>
-        {t("fields.email")}
-        <input
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="sign-up-email">{t("fields.email")}</Label>
+        <Input
+          id="sign-up-email"
           aria-describedby={errors.email ? "sign-up-email-error" : undefined}
           aria-invalid={Boolean(errors.email)}
           autoCapitalize="none"
@@ -40,14 +45,15 @@ export function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
           {...form.register("email")}
         />
         {errors.email?.message ? (
-          <span className="field-error" id="sign-up-email-error">
+          <span className="text-xs font-medium text-destructive" id="sign-up-email-error">
             {t(errors.email.message)}
           </span>
         ) : null}
-      </label>
-      <label>
-        {t("fields.password")}
-        <input
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="sign-up-password">{t("fields.password")}</Label>
+        <Input
+          id="sign-up-password"
           aria-describedby={
             errors.password ? "password-hint sign-up-password-error" : "password-hint"
           }
@@ -57,23 +63,23 @@ export function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
           type="password"
           {...form.register("password")}
         />
-        <span className="field-hint" id="password-hint">
+        <span className="text-xs text-muted-foreground" id="password-hint">
           {t("fields.passwordHint")}
         </span>
         {errors.password?.message ? (
-          <span className="field-error" id="sign-up-password-error">
+          <span className="text-xs font-medium text-destructive" id="sign-up-password-error">
             {t(errors.password.message)}
           </span>
         ) : null}
-      </label>
+      </div>
       {rootError ? (
-        <p className="error-message" role="alert">
+        <p className="rounded-md bg-destructive/10 p-3 text-sm leading-6 text-destructive" role="alert">
           {rootError}
         </p>
       ) : null}
-      <button className="primary-button" disabled={signUpMutation.isPending} type="submit">
+      <Button disabled={signUpMutation.isPending} type="submit">
         {signUpMutation.isPending ? t("signUp.submitting") : t("signUp.submit")}
-      </button>
+      </Button>
     </form>
   );
 }
