@@ -1,14 +1,17 @@
+import { parseIdentityResponse } from "@anki-miner/api-client";
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { eq } from "drizzle-orm";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { createDatabase } from "@/db";
 import { user } from "@/db/schema/auth";
-import { createAuth } from "@/lib/auth-factory";
-import { createDatabase } from "@/lib/database";
-import type { VerificationEmail } from "@/lib/email";
+import { createAuth } from "./create-auth";
+import { createIdentityHandler } from "./identity";
+import type { VerificationEmail } from "./verification-email";
 
 const BASE_URL = "http://localhost:3000";
+const DESKTOP_ORIGIN = "tauri://localhost";
 const PASSWORD = "uma-senha-segura";
 
 describe("desktop authentication", () => {
@@ -30,7 +33,7 @@ describe("desktop authentication", () => {
     await container.stop();
   });
 
-  it("restringe cadastro, verifica emails e isola duas sessões", async () => {
+  it("restringe cadastro, verifica emails e isola duas contas pelo endpoint de identidade", async () => {
     const allowedEmails = new Set(["ana@example.com", "bia@example.com"]);
     const auth = createAuth({
       allowedEmails,
@@ -42,8 +45,12 @@ describe("desktop authentication", () => {
       sendVerificationEmail: async (message) => {
         sentEmails.push(message);
       },
-      trustedOrigins: [BASE_URL, "tauri://localhost"],
+      trustedOrigins: [BASE_URL, DESKTOP_ORIGIN],
     });
+    const getIdentity = createIdentityHandler(
+      async (headers) => auth.api.getSession({ headers }),
+      new Set([DESKTOP_ORIGIN]),
+    );
 
     const refused = await postAuth(auth, "/sign-up/email", {
       email: "intruso@example.com",
@@ -59,16 +66,22 @@ describe("desktop authentication", () => {
     const tokenAna = await signIn(auth, "ana@example.com");
     const tokenBia = await signIn(auth, "bia@example.com");
 
-    const sessionAna = await auth.api.getSession({ headers: bearerHeaders(tokenAna) });
-    const sessionBia = await auth.api.getSession({ headers: bearerHeaders(tokenBia) });
-    expect(sessionAna?.user.email).toBe("ana@example.com");
-    expect(sessionBia?.user.email).toBe("bia@example.com");
-    expect(sessionAna?.user.id).not.toBe(sessionBia?.user.id);
+    const identityAna = await getIdentity(identityRequest(tokenAna));
+    const identityBia = await getIdentity(identityRequest(tokenBia));
+    expect(identityAna.status).toBe(200);
+    expect(identityBia.status).toBe(200);
+    expect(identityAna.headers.get("access-control-allow-origin")).toBe(DESKTOP_ORIGIN);
+
+    const ana = parseIdentityResponse(await identityAna.json()).user;
+    const bia = parseIdentityResponse(await identityBia.json()).user;
+    expect(ana).toMatchObject({ email: "ana@example.com", name: "Ana" });
+    expect(bia).toMatchObject({ email: "bia@example.com", name: "Bia" });
+    expect(ana.id).not.toBe(bia.id);
 
     const logoutAna = await postAuth(auth, "/sign-out", undefined, tokenAna);
     expect(logoutAna.status).toBe(200);
-    expect(await auth.api.getSession({ headers: bearerHeaders(tokenAna) })).toBeNull();
-    expect((await auth.api.getSession({ headers: bearerHeaders(tokenBia) }))?.user.email).toBe(
+    expect((await getIdentity(identityRequest(tokenAna))).status).toBe(401);
+    expect(parseIdentityResponse(await (await getIdentity(identityRequest(tokenBia))).json()).user.email).toBe(
       "bia@example.com",
     );
   }, 60_000);
@@ -76,8 +89,10 @@ describe("desktop authentication", () => {
 
 type Auth = ReturnType<typeof createAuth>;
 
-function bearerHeaders(token: string) {
-  return new Headers({ authorization: `Bearer ${token}` });
+function identityRequest(token: string) {
+  return new Request(`${BASE_URL}/api/me`, {
+    headers: { authorization: `Bearer ${token}`, origin: DESKTOP_ORIGIN },
+  });
 }
 
 async function postAuth(auth: Auth, path: string, body?: object, token?: string) {

@@ -1,9 +1,9 @@
 import { waitUntil } from "@vercel/functions";
 
-import { parseAllowedEmails } from "@/lib/allowed-emails";
-import { createAuth } from "@/lib/auth-factory";
-import { createDatabase } from "@/lib/database";
-import { createResendVerificationEmailSender } from "@/lib/email";
+import { createDatabase } from "@/db";
+import { parseAllowedEmails } from "./allowed-emails";
+import { createAuth } from "./create-auth";
+import { createResendVerificationEmailSender } from "./verification-email";
 
 function requiredEnvironment(name: string) {
   const value = process.env[name];

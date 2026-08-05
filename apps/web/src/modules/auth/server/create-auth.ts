@@ -5,8 +5,8 @@ import { bearer } from "better-auth/plugins/bearer";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import { authSchema } from "@/db/schema/auth";
-import { normalizeEmail } from "@/lib/allowed-emails";
-import type { VerificationEmailSender } from "@/lib/email";
+import { normalizeEmail } from "./allowed-emails";
+import type { VerificationEmailSender } from "./verification-email";
 
 type AuthDatabase = PostgresJsDatabase<typeof authSchema>;
 

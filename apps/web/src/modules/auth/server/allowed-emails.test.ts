@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeEmail, parseAllowedEmails } from "@/lib/allowed-emails";
+import { normalizeEmail, parseAllowedEmails } from "./allowed-emails";
 
 describe("allowed emails", () => {
   it("normaliza caixa e espaços externos", () => {

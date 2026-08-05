@@ -1,0 +1,77 @@
+export const enTranslation = {
+  translation: {
+    account: {
+      description: "Your account is ready to use Anki Miner.",
+      email: "Email",
+      greeting: "Hello, {{name}}",
+      logout: "Sign out",
+      loggingOut: "Signing out...",
+      status: "Active session",
+      verification: "Verification",
+      verified: "Confirmed",
+    },
+    auth: {
+      modeLabel: "Choose between signing in or creating an account",
+      privateAccount: "Private account",
+    },
+    brand: {
+      privacy: "Session protected by macOS Keychain",
+      supporting: "Sign in to keep your captures, decisions, and history separate.",
+      tagline: "From discovering a word to a reviewed card.",
+      topic: "Sentence mining",
+    },
+    errors: {
+      invalidCredentials: "Invalid email or password.",
+      invalidSession: "The new session could not be validated.",
+      keychain: "The session could not be protected in macOS Keychain.",
+      logout: "Could not sign out securely. Try again.",
+      missingToken: "The service did not return a secure session.",
+      network: "The service could not be reached. Check your connection and try again.",
+      restore: "Your session could not be restored.",
+      signUp: "The account could not be created. Try again.",
+      unexpected: "Something went wrong. Try again.",
+      unverified: "Confirm your email before signing in. We sent you a new link.",
+    },
+    fields: {
+      email: "Email",
+      name: "Name",
+      password: "Password",
+      passwordHint: "Use at least 8 characters.",
+    },
+    language: {
+      english: "English",
+      label: "Language",
+      portuguese: "Português",
+    },
+    login: {
+      description: "Continue where you left off on your Mac.",
+      submit: "Sign in",
+      submitting: "Signing in...",
+      title: "Sign in to Anki Miner",
+    },
+    restore: {
+      description: "Your session remains stored on this Mac.",
+      retry: "Try again",
+      status: "Session preserved",
+      title: "Your session could not be confirmed",
+    },
+    restoring: "Restoring session",
+    signUp: {
+      description: "Use one of the email addresses authorized for this beta.",
+      submit: "Create account",
+      submitting: "Creating account...",
+      title: "Create your account",
+    },
+    validation: {
+      email: "Enter a valid email address.",
+      name: "Enter your name.",
+      password: "Enter your password.",
+      passwordLength: "Use at least 8 characters.",
+    },
+    verification: {
+      description: "We sent a confirmation link. Open it in your browser, then return to sign in.",
+      return: "Return to sign in",
+      title: "Check your email",
+    },
+  },
+} as const;
