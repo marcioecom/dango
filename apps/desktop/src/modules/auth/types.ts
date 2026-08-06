@@ -1,3 +1,10 @@
+export type AuthenticatedUser = {
+  email: string;
+  emailVerified: boolean;
+  id: string;
+  name: string;
+};
+
 export type AuthenticationErrorKey =
   | "errors.invalidCredentials"
   | "errors.invalidSession"

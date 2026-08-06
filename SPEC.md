@@ -230,5 +230,6 @@ Model comparison measures structured-output validity, naturalness, correct targe
 
 ## Open inputs
 
-- The representative 600-entry source file has not yet been added.
-- Default AI model, fallback model, TTS provider, daily generation limit, and default daily goal remain intentionally unset until measured or chosen by the user.
+- The default AI model is `openai/gpt-5-mini`, with `google/gemini-2.5-flash` as fallback, selected from the measured LEA-30 benchmark.
+- The initial TTS provider is gTTS, selected from the measured LEA-29 audio comparison. On provider failure, preserve the approved review decision and retry gTTS; no cross-provider backend fallback is selected for the private beta because edge-tts returned HTTP 403 and macOS `say` is device-local.
+- Daily generation limit and default daily goal remain intentionally unset until measured or chosen by the user.
