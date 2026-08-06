@@ -13,7 +13,6 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
-    "@dango/api-client": "workspace:*",
     "@dango/ui": "workspace:*",
     "@better-auth/drizzle-adapter": "^1.6.26",
     "@vercel/functions": "^3.7.7",

@@ -6,7 +6,7 @@ import { I18nextProvider } from "react-i18next";
 import { i18n, type SupportedLocale } from "../i18n/i18n";
 
 export function renderWithProviders(ui: ReactElement, locale: SupportedLocale = "pt-BR") {
-  void i18n.changeLanguage(locale);
+  i18n.changeLanguage(locale);
   const queryClient = new QueryClient({
     defaultOptions: {
       mutations: { retry: false },

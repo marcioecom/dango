@@ -1,8 +1,11 @@
-import type { AuthenticatedUser } from "@dango/api-client";
 import { z } from "zod";
 
 import { authClient } from "../../lib/auth-client";
-import { AuthenticationError, type AuthenticationErrorKey } from "./types";
+import {
+  AuthenticationError,
+  type AuthenticatedUser,
+  type AuthenticationErrorKey,
+} from "./types";
 
 const authenticatedUserSchema = z.object({
   email: z.string(),
@@ -24,7 +27,9 @@ export function responseError(
   return new AuthenticationError(fallback);
 }
 
-export function signInResponseError(error: BetterAuthError): AuthenticationError {
+export function signInResponseError(
+  error: BetterAuthError,
+): AuthenticationError {
   if (error.code === "EMAIL_NOT_VERIFIED" || error.status === 403) {
     return new AuthenticationError("errors.unverified");
   }

@@ -6,7 +6,7 @@ const origins = new Set(["http://localhost:1420", "tauri://localhost"]);
 
 describe("CORS", () => {
   it("expõe o token somente para uma origem autorizada", () => {
-    const request = new Request("http://localhost/api/me", {
+    const request = new Request("http://localhost/api/auth/get-session", {
       headers: { origin: "tauri://localhost" },
     });
     const response = withCors(request, Response.json({ ok: true }), origins);
@@ -16,7 +16,7 @@ describe("CORS", () => {
   });
 
   it("não adiciona headers para uma origem desconhecida", () => {
-    const request = new Request("http://localhost/api/me", {
+    const request = new Request("http://localhost/api/auth/get-session", {
       headers: { origin: "https://malicioso.example" },
     });
     const response = withCors(request, Response.json({ ok: true }), origins);

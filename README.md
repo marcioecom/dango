@@ -16,7 +16,6 @@ apps/
   web/          Next.js backend and future installable PWA
 packages/
   domain/       Shared domain schemas and state transitions
-  api-client/   Typed API and synchronization client
   ui/           UI shared only when desktop and PWA need it
 docs/adr/       Architecture decision records
 ```
