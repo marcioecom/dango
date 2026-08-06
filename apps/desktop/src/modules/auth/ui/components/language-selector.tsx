@@ -13,7 +13,7 @@ export function LanguageSelector() {
       <NativeSelect
         aria-label={t("language.label")}
         className="h-9 min-w-28 py-0 text-sm"
-        onChange={(event) => void i18n.changeLanguage(event.target.value)}
+        onChange={(event) => i18n.changeLanguage(event.target.value)}
         value={locale}
       >
         <option value="pt-BR">{t("language.portuguese")}</option>

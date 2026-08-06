@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useLogout } from "../../hooks/use-logout";
 import { errorKey } from "../../session";
+import { ReminderView } from "../../../reminder/ui/reminder-view";
 
 export function AccountView({ user }: { user: AuthenticatedUser }) {
   const { t } = useTranslation();
@@ -28,6 +29,7 @@ export function AccountView({ user }: { user: AuthenticatedUser }) {
           <dd className="m-0 font-semibold text-right">{t("account.verified")}</dd>
         </div>
       </dl>
+      <ReminderView />
       {logoutMutation.error ? (
         <p className="mt-5 rounded-md bg-destructive/10 p-3 text-sm leading-6 text-destructive" role="alert">
           {t(errorKey(logoutMutation.error, "errors.logout"))}
