@@ -1,0 +1,140 @@
+Lista do dia:
+1. Camping
+2. Spring Breaks
+3. Get away
+4. Slow down
+5. Took after
+6. Seriously
+7. Complexion
+8. Mischief
+9. Corners
+10. Popping out
+
+1) Preciso que você me dê uma explicação de 1 parágrafo de 3 até 5 linhas para a tradução de inglês para português de cada palavra da “lista do dia”.
+
+2) Preciso que você me dê traduções de cada palavra da “lista do dia” de inglês para português sem explicação, apenas os termos traduzidos, separados por vírgula e em uma única linha.
+
+3) Preciso que você me dê 5 exemplos de cada palavra da “lista do dia”. Os exemplos devem ser em inglês e devem ter tamanho de apenas 1 linha. Os exemplos devem ter de 20 a 50 caracteres cada.
+
+Explicação, termos traduzidos e exemplos devem ficar agrupados para cada palavra da lista do dia.
+
+Segue um modelo como você deve me mostrar os resultados:
+
+*Play:*
+Explicação: "Play" em inglês significa brincar ou jogar. Pode se referir tanto a atividades lúdicas quanto a participação em jogos ou esportes.
+
+Play: Brincar, Jogar
+
+Exemplos:
+1. She loves to play with her dog in the park.
+2. Let's play a board game after dinner.
+3. The children are playing hide-and-seek.
+4. He enjoys playing basketball on weekends.
+5. The theater will host a play next week.
+
+*Essential:*
+Explicação: "Essential" traduzido para o português significa essencial, algo fundamental ou indispensável para algo.
+Essential: Essencial
+
+Exemplos:
+1. Water is essential for human survival.
+2. Good communication is essential in a team.
+3. A healthy diet is essential for overall well-being.
+4. Sleep is essential for proper cognitive function.
+5. Sunscreen is essential for protecting your skin.
+
+*Better:*
+Explicação: A palavra "better" em inglês é utilizada para expressar melhoria ou superioridade em relação a algo.
+
+Better: Melhor
+
+Exemplos:
+1. Practice makes you better at playing the guitar.
+2. Eating fruits and vegetables is better for your health.
+3. She hopes for a better future for her children.
+4. The new software provides a better user experience.
+5. Getting enough sleep makes you feel better.
+
+*Full:*
+Explicação: "Full" pode ser traduzido como cheio ou completo. Pode referir-se à capacidade máxima de algo ou à presença de todos os elementos necessários.
+
+Full: Cheio, Completo
+
+Exemplos:
+1. The glass is full of water.
+2. After the meal, I feel full.
+3. Please provide your full name and address.
+4. The movie theater was full of excited viewers.
+5. The project is in its full implementation stage.
+
+*Portable:*
+Explicação: "Portable" em inglês significa portátil, algo que pode ser facilmente transportado de um lugar para outro.
+
+Portable: Portátil
+
+Exemplos:
+1. A portable phone charger is handy for travel.
+2. We use a portable grill for outdoor cooking.
+3. The laptop is lightweight and portable.
+4. Portable speakers are great for picnics.
+5. This toolbox is designed to be portable.
+
+*Class:*
+Explicação: "Class" pode ser traduzido como classe, categoria ou aula. O significado depende do contexto em que a palavra é usada.
+
+Class: Classe, Aula
+
+Exemplos:
+1. She is taking a class on photography.
+2. The car belongs to the luxury class.
+3. The students are in math class right now.
+4. This book falls into the mystery genre class.
+5. The hotel offers different classes of rooms.
+
+*Bring:*
+Explicação: "Bring" em inglês significa trazer, transportar algo de um lugar para outro.
+
+Bring: Trazer
+
+Exemplos:
+1. Can you bring the documents to the meeting?
+2. She always brings a smile to our faces.
+3. Please bring a dish to share at the potluck.
+4. He forgot to bring his umbrella in the rain.
+5. I'll bring some snacks for the road trip.
+
+*Brown:*
+Explicação: "Brown" traduzido para o português significa marrom, uma cor que inclui tons escuros de vermelho e amarelo.
+
+Brown: Marrom
+
+Exemplos:
+1. Her eyes are a beautiful shade of brown.
+2. The dog has a soft, brown fur coat.
+3. The leather couch is a deep brown color.
+4. Autumn leaves turn various shades of brown.
+5. He prefers to wear brown shoes with his suits.
+
+*Flag:*
+Explicação: "Flag" pode ser traduzido como bandeira ou sinalizador. Também é usado para indicar problemas ou alertas.
+
+Flag: Bandeira, Sinalizador
+
+Exemplos:
+1. The national flag waved proudly in the wind.
+2. Red flags were raised as a warning.
+3. They planted a flag at the mountain's summit.
+4. The referee threw a flag during the game.
+5. The system raised a flag for suspicious activity.
+
+*Fight:*
+Explicação: "Fight" em inglês significa lutar, tanto no sentido físico quanto no sentido de enfrentar desafios ou adversidades.
+
+Fight: Lutar
+
+Exemplos:
+1. They had a fierce fight in the boxing ring.
+2. It's important to fight for justice.
+3. Soldiers fight to defend their country.
+4. Couples sometimes fight about trivial matters.
+5. The team showed determination in the fight for victory.

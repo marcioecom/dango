@@ -27,13 +27,14 @@ There are no shared queues or shared progress.
 ## Core workflow
 
 1. Capture a word or expression, optionally with its original sentence and source.
-2. Keep the capture in an inbox until a mining session starts.
-3. Generate a Portuguese explanation, translation, and five English example sentences.
+2. Keep the capture in an inbox until the user chooses to mine it, either immediately or later.
+3. Generate a Portuguese explanation, translation, and five English example sentences in the PWA or desktop.
 4. Review the original sentence and generated alternatives.
 5. Select or edit one sentence and explicitly approve it.
-6. Generate and preview its English audio.
-7. Deliver the card to the user's local Anki through AnkiConnect.
-8. Retry safely if Anki is closed or unavailable.
+6. Synchronize the approved capture to the desktop.
+7. Generate and preview its English audio on the desktop.
+8. Deliver the card to the user's local Anki through AnkiConnect.
+9. Retry safely if Anki is closed or unavailable.
 
 ## Product principles
 
@@ -52,7 +53,7 @@ There are no shared queues or shared progress.
 - Appearance: follow the system light or dark theme.
 - Desktop home: a focused `Hoje` view with progress, pending work, Anki state, and one primary action.
 - Desktop capture: main application window for the initial release.
-- Mobile capture: installable PWA opened from the iPhone home screen.
+- Mobile mining: installable PWA for capture, generation, review, and approval from the iPhone home screen.
 - Motion communicates state and never delays the task.
 - Errors explain what happened and what the user can do next.
 - The visual language is calm and precise, with restrained references to Japanese craft rather than kawaii or confectionery themes.

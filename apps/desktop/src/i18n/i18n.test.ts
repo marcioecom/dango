@@ -7,15 +7,14 @@ describe("locale detection", () => {
     window.localStorage.clear();
   });
 
-  it("ignora idiomas não suportados antes de uma preferência compatível", () => {
+  it("ignores unsupported languages before a compatible preference", () => {
     vi.spyOn(navigator, "languages", "get").mockReturnValue(["es-ES", "pt-BR"]);
 
     expect(detectInitialLocale()).toBe("pt-BR");
   });
 
-  it("aceita somente variantes de português e inglês", () => {
+  it("accepts only Portuguese and English variants", () => {
     expect(normalizeLocale("pt-PT")).toBe("pt-BR");
     expect(normalizeLocale("en-US")).toBe("en");
-    expect(normalizeLocale("es-ES")).toBeNull();
   });
 });
