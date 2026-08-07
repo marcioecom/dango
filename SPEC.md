@@ -6,14 +6,14 @@ Baseline specification approved from the migration planning conversation. Implem
 
 ## Scope
 
-Dango is a new project replacing the daily workflow of the Python `anki-automator` CLI. The first usable delivery is a macOS desktop app plus a shared backend. An installable iPhone PWA follows after the desktop beta is validated.
+Dango is a new project replacing the daily workflow of the Python `anki-automator` CLI. The first usable delivery is an installable iPhone PWA plus a shared backend for online capture, AI generation, review, and approval. The macOS desktop follows as the device-local bridge for audio generation and Anki delivery.
 
 The existing Python repository remains unchanged as reference and fallback. This repository does not need to preserve its internal architecture or file formats beyond the explicit pending-item import.
 
 ## Target platforms
 
 - First desktop platform: macOS.
-- Future mobile capture platform: iPhone through a PWA.
+- First client platform: iPhone through a PWA.
 - Initial distribution: private, for two users.
 - Paid Apple Developer membership, TestFlight, App Store, Windows, Linux, and native iOS are outside the initial scope.
 
@@ -157,9 +157,10 @@ Generation attempts and Anki deliveries are separate records from the capture. A
 ### PWA
 
 - `PWA-01`: The PWA is installable from Safari and optimized for the target iPhone.
-- `PWA-02`: Its initial scope is capture and recent capture status only.
-- `PWA-03`: Offline captures persist in IndexedDB and synchronize later.
-- `PWA-04`: Generation, review, TTS, and Anki delivery remain desktop workflows.
+- `PWA-02`: Its first delivery supports online capture, inbox browsing, generation, review, editing, and explicit approval.
+- `PWA-03`: Offline captures persist in IndexedDB and synchronize later, after the first online delivery is validated.
+- `PWA-04`: TTS and Anki delivery remain desktop-only workflows.
+- `PWA-05`: An approved capture remains authoritative in the backend until a desktop creates its durable local Anki delivery.
 
 ### Migration
 
@@ -207,12 +208,11 @@ Model comparison measures structured-output validity, naturalness, correct targe
 ## Delivery milestones
 
 1. Riscos validados: authentication, model, TTS, AnkiConnect, and notification tracer bullets.
-2. Captura sincronizada: online capture, offline outbox, and duplicate handling.
-3. Mineração guiada: generation, review, sessions, and measured usage limits.
-4. Entrega ao Anki: local configuration, audio, idempotent outbox, and recovery.
+2. Mineração PWA privada: installable PWA, online capture, inbox, generation, review, approval, and measured usage limits.
+3. Captura local-first: IndexedDB and desktop outboxes, synchronization, and duplicate handling.
+4. Entrega ao Anki: desktop configuration, audio, idempotent outbox, and recovery.
 5. Rotina diária: Hoje, history, reminders, menu bar, and autostart.
 6. Beta desktop privado: production operation, manual macOS distribution, migration, and two-user acceptance.
-7. Captura no iPhone: installable PWA, offline capture, and recent status.
 
 ## Explicit non-goals
 

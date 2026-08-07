@@ -53,7 +53,7 @@ describe("desktop authentication", () => {
     });
   });
 
-  it("cria uma conta e orienta a verificação por email", async () => {
+  it("creates an account and guides email verification", async () => {
     const user = userEvent.setup();
     renderWithProviders(<AuthView />);
 
@@ -66,14 +66,14 @@ describe("desktop authentication", () => {
 
     expect(await screen.findByRole("heading", { name: "Confira seu email" })).toBeVisible();
     expect(authClient.signUp.email).toHaveBeenCalledWith({
-      callbackURL: "http://localhost:3000/email-verificado",
+      callbackURL: "http://localhost:3000/email-verified",
       email: "ana@example.com",
       name: "Ana",
       password: "uma-senha-segura",
     });
   });
 
-  it("valida a identidade antes de proteger o token no Keychain", async () => {
+  it("validates identity before storing the token in Keychain", async () => {
     const user = userEvent.setup();
     renderWithProviders(<AuthView />);
 
@@ -87,7 +87,7 @@ describe("desktop authentication", () => {
     );
   });
 
-  it("compensa a sessão quando a identidade não pode ser validada", async () => {
+  it("compensates the session when identity validation fails", async () => {
     vi.mocked(authClient.getSession).mockResolvedValue({ data: null, error: null });
     const user = userEvent.setup();
     renderWithProviders(<AuthView />);
@@ -106,7 +106,7 @@ describe("desktop authentication", () => {
     expect(setAuthToken).toHaveBeenLastCalledWith(null);
   });
 
-  it("compensa a sessão quando o Keychain não protege o token", async () => {
+  it("compensates the session when Keychain storage fails", async () => {
     vi.mocked(saveSessionToken).mockRejectedValue(new Error("Keychain indisponível"));
     const user = userEvent.setup();
     renderWithProviders(<AuthView />);
@@ -121,7 +121,7 @@ describe("desktop authentication", () => {
     expect(screen.getByRole("heading", { name: "Entrar no Dango" })).toBeVisible();
   });
 
-  it("preserva o erro original quando a revogação compensatória falha", async () => {
+  it("preserves the original error when compensating revocation fails", async () => {
     vi.mocked(authClient.getSession).mockResolvedValue({ data: null, error: null });
     vi.mocked(authClient.signOut).mockResolvedValue({
       data: null,
@@ -140,7 +140,7 @@ describe("desktop authentication", () => {
     expect(setAuthToken).toHaveBeenLastCalledWith(null);
   });
 
-  it("restaura e revoga a sessão persistida", async () => {
+  it("restores and revokes the persisted session", async () => {
     vi.mocked(loadSessionToken).mockResolvedValue("token-ana");
     const user = userEvent.setup();
     renderWithProviders(<AuthView />);
@@ -154,7 +154,7 @@ describe("desktop authentication", () => {
     expect(await screen.findByRole("heading", { name: "Entrar no Dango" })).toBeVisible();
   });
 
-  it("troca para inglês e persiste a escolha", async () => {
+  it("switches to English and persists the selection", async () => {
     const user = userEvent.setup();
     renderWithProviders(<AuthView />);
 
@@ -166,7 +166,7 @@ describe("desktop authentication", () => {
     expect(document.documentElement.lang).toBe("en");
   });
 
-  it("traduz erros do Zod ao trocar o idioma", async () => {
+  it("translates Zod errors when switching languages", async () => {
     const user = userEvent.setup();
     renderWithProviders(<AuthView />);
 
@@ -181,7 +181,7 @@ describe("desktop authentication", () => {
     expect(authClient.signIn.email).not.toHaveBeenCalled();
   });
 
-  it("distingue falhas de rede no login", async () => {
+  it("distinguishes network failures during sign-in", async () => {
     vi.mocked(authClient.signIn.email).mockRejectedValue(new TypeError("Failed to fetch"));
     const user = userEvent.setup();
     renderWithProviders(<AuthView />);

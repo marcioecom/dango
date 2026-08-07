@@ -6,7 +6,7 @@ describe("auth client", () => {
     vi.resetModules();
   });
 
-  it("envia o bearer sem credenciais de cookie", async () => {
+  it("sends the bearer token without cookie credentials", async () => {
     const fetchMock = vi.fn().mockResolvedValue(Response.json(null));
     vi.stubGlobal("fetch", fetchMock);
     const { authClient, setAuthToken } = await import("./auth-client");

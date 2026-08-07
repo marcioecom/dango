@@ -25,7 +25,7 @@ export function useSignUpForm(onSuccess: () => void) {
       const { error } = await authRequest(() =>
         authClient.signUp.email({
           ...values,
-          callbackURL: `${authBaseUrl}/email-verificado`,
+          callbackURL: `${authBaseUrl}/email-verified`,
         }),
       );
       if (error) throw responseError(error, "errors.signUp");

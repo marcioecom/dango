@@ -3,12 +3,15 @@
   "private": true,
   "packageManager": "pnpm@10.11.0",
   "scripts": {
-    "build": "pnpm -r --if-present build",
-    "check": "pnpm -r --if-present check",
+    "build": "turbo build",
+    "check": "turbo check",
     "db:migrate": "pnpm --filter @dango/web db:migrate",
     "db:up": "docker compose up -d postgres",
-    "dev": "pnpm -r --parallel --if-present dev",
+    "dev": "turbo dev",
     "dev:desktop": "pnpm --filter @dango/desktop tauri dev",
-    "test": "pnpm -r --if-present test"
+    "test": "turbo test"
+  },
+  "devDependencies": {
+    "turbo": "^2.10.5"
   }
 }
