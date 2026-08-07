@@ -1,8 +1,11 @@
+import { randomUUID } from "node:crypto";
+
+import { and, eq, inArray } from "drizzle-orm";
+
 import type { Database } from "@/db";
 import { capture, generation, generationUsage } from "@/db/schema/mining";
-import { and, count, desc, eq, gte, lte, sql } from "drizzle-orm";
 
-import { getCapture } from "./captures";
+import { getCapture, listCaptures } from "./captures";
 import { MiningError } from "./errors";
 import {
   DEFAULT_MODEL,
@@ -11,325 +14,134 @@ import {
   type SentenceGenerator,
 } from "./sentence-generator";
 
-type GenerationSettings = {
-  dailyLimit: number | null;
-  defaultModel?: string;
-  fallbackModel?: string;
-  operationTimeoutMs: number;
-};
+const generationTimeoutMs = 60_000;
 
 export async function generateCapture(
   database: Database,
   userId: string,
   captureId: string,
-  generationId: string,
+  operationId: string,
   generator: SentenceGenerator,
-  settings: GenerationSettings,
 ) {
-  const defaultModel = settings.defaultModel ?? DEFAULT_MODEL;
-  const fallbackModel = settings.fallbackModel ?? FALLBACK_MODEL;
-  const existing = await database
-    .select()
-    .from(generation)
-    .where(and(eq(generation.id, generationId), eq(generation.userId, userId)));
+  await generateCaptures(database, userId, [captureId], operationId, generator);
+  return getCapture(database, userId, captureId);
+}
 
-  if (existing[0]) {
-    if (existing[0].captureId !== captureId) {
-      throw new MiningError("GENERATION_ID_REUSED", "Esta tentativa já pertence a outra captura.", 409);
-    }
-    if (existing[0].status === "succeeded") {
-      return getCapture(database, userId, captureId);
-    }
-    if (existing[0].status === "failed") {
-      throw new MiningError(
-        "GENERATION_FAILED",
-        "Esta tentativa falhou. Inicie uma nova geração.",
-        502,
-      );
-    }
-    if (existing[0].leaseExpiresAt <= new Date()) {
-      const expired = await expireGenerationAttempt(
-        database,
-        userId,
-        existing[0].captureId,
-        existing[0].id,
-      );
-      if (!expired) {
-        throw new MiningError("GENERATION_RUNNING", "Esta geração ainda está em andamento.", 409);
-      }
-      throw new MiningError(
-        "GENERATION_EXPIRED",
-        "A geração anterior foi interrompida. Inicie uma nova tentativa.",
-        409,
-      );
-    }
-    throw new MiningError("GENERATION_RUNNING", "Esta geração ainda está em andamento.", 409);
-  }
-
-  const captureRow = await reserveGeneration(
-    database,
-    userId,
-    captureId,
-    generationId,
-    defaultModel,
-    settings.dailyLimit,
-    settings.operationTimeoutMs,
-  );
+export async function generateCaptures(
+  database: Database,
+  userId: string,
+  captureIds: string[],
+  operationId: string,
+  generator: SentenceGenerator,
+) {
+  const reserved = await reserve(database, userId, captureIds, operationId);
+  if (!reserved) return listCaptures(database, userId);
 
   let lastError: unknown;
-  for (const model of [defaultModel, fallbackModel]) {
-    const startedAt = performance.now();
-    const lease = await database
-      .update(generation)
-      .set({ leaseExpiresAt: new Date(Date.now() + settings.operationTimeoutMs) })
-      .where(
-        and(
-          eq(generation.id, generationId),
-          eq(generation.userId, userId),
-          eq(generation.status, "running"),
-        ),
-      )
-      .returning({ id: generation.id });
-    if (lease.length === 0) {
-      throw new MiningError(
-        "GENERATION_EXPIRED",
-        "A geração perdeu a reserva. Inicie uma nova tentativa.",
-        409,
-      );
-    }
-
-    let result: Awaited<ReturnType<SentenceGenerator>>;
+  for (const model of [DEFAULT_MODEL, FALLBACK_MODEL]) {
     try {
-      result = await generator({
+      const result = await generator({
+        captures: reserved.captures.map((capture) => ({
+          ...capture,
+          kind: capture.kind as "sentence" | "term",
+        })),
         model,
-        originalSentence: captureRow.originalSentence,
-        source: captureRow.source,
-        text: captureRow.text,
-        timeoutMs: settings.operationTimeoutMs,
+        timeoutMs: generationTimeoutMs,
       });
+      const completedAt = new Date();
+      await database.transaction(async (transaction) => {
+        for (const item of reserved.generations) {
+          const output = result.outputs.get(item.captureId);
+          if (!output) throw new MiningError("INVALID_GENERATION", "A resposta não contém todos os itens.", 502);
+          await transaction
+            .update(generation)
+            .set({
+              ambiguityNotePtBr: output.ambiguityNotePtBr,
+              completedAt,
+              errorCode: null,
+              examples: output.examples,
+              explanationPtBr: output.explanationPtBr,
+              model,
+              originalSentenceTranslationPtBr: output.originalSentenceTranslationPtBr,
+              sentenceTranslationPtBr: output.sentenceTranslationPtBr,
+              status: "succeeded",
+              translationsPtBr: output.translationsPtBr,
+            })
+            .where(and(eq(generation.id, item.id), eq(generation.userId, userId), eq(generation.status, "running")));
+        }
+        await transaction.insert(generationUsage).values({
+          generationId: reserved.generations[0].id,
+          inputTokens: result.usage.inputTokens,
+          latencyMs: result.usage.latencyMs,
+          model,
+          outcome: "succeeded",
+          outputTokens: result.usage.outputTokens,
+          reportedCostUsd: result.usage.reportedCostUsd,
+          userId,
+        });
+        await transaction
+          .update(capture)
+          .set({ status: "ready_for_review", updatedAt: completedAt })
+          .where(and(eq(capture.userId, userId), inArray(capture.id, captureIds)));
+      });
+      return listCaptures(database, userId);
     } catch (error) {
       lastError = error;
-      await database.insert(generationUsage).values({
-        generationId,
-        latencyMs: Math.round(performance.now() - startedAt),
+      console.error("[generation-batch] model attempt failed", {
+        error: error instanceof Error ? error.message : "UnknownError",
         model,
-        outcome: "failed",
-        userId,
+        operationId,
       });
-      continue;
     }
-
-    const completedAt = new Date();
-    await database.transaction(async (transaction) => {
-      const claimed = await transaction
-        .update(generation)
-        .set({
-          completedAt,
-          errorCode: null,
-          explanation: result.output.explanation,
-          model,
-          sentences: result.output.sentences,
-          status: "succeeded",
-          translation: result.output.translation,
-        })
-        .where(
-          and(
-            eq(generation.id, generationId),
-            eq(generation.userId, userId),
-            eq(generation.status, "running"),
-          ),
-        )
-        .returning({ id: generation.id });
-      if (claimed.length === 0) {
-        throw new MiningError(
-          "GENERATION_EXPIRED",
-          "A geração expirou antes de ser salva. Inicie uma nova tentativa.",
-          409,
-        );
-      }
-      await transaction.insert(generationUsage).values({
-        generationId,
-        inputTokens: result.usage.inputTokens,
-        latencyMs: result.usage.latencyMs,
-        model,
-        outcome: "succeeded",
-        outputTokens: result.usage.outputTokens,
-        reportedCostUsd: result.usage.reportedCostUsd,
-        userId,
-      });
-      await transaction
-        .update(capture)
-        .set({ status: "ready_for_review", updatedAt: completedAt })
-        .where(and(eq(capture.id, captureId), eq(capture.userId, userId)));
-    });
-    return getCapture(database, userId, captureId);
   }
 
   await database.transaction(async (transaction) => {
-    const failed = await transaction
+    await transaction
       .update(generation)
       .set({ completedAt: new Date(), errorCode: "PROVIDER_FAILURE", status: "failed" })
-      .where(
-        and(
-          eq(generation.id, generationId),
-          eq(generation.userId, userId),
-          eq(generation.status, "running"),
-        ),
-      )
-      .returning({ id: generation.id });
-    if (failed.length > 0) {
-      const [latest] = await transaction
-        .select({ id: generation.id })
-        .from(generation)
-        .where(and(eq(generation.captureId, captureId), eq(generation.userId, userId)))
-        .orderBy(desc(generation.createdAt));
-      if (latest?.id === generationId) {
-        await transaction
-          .update(capture)
-          .set({ status: "inbox", updatedAt: new Date() })
-          .where(and(eq(capture.id, captureId), eq(capture.userId, userId)));
-      }
-    }
+      .where(and(eq(generation.userId, userId), inArray(generation.id, reserved.generations.map((item) => item.id))));
+    await transaction
+      .update(capture)
+      .set({ status: "inbox", updatedAt: new Date() })
+      .where(and(eq(capture.userId, userId), inArray(capture.id, captureIds)));
   });
-
-  console.error("Falha nos modelos de geração", {
-    error: lastError instanceof Error ? lastError.name : "UnknownError",
-    generationId,
-    models: [defaultModel, fallbackModel],
-  });
-  throw new MiningError(
-    "GENERATION_FAILED",
-    "A geração falhou nos dois modelos. Sua captura continua na fila.",
-    502,
-  );
+  console.error("Batch generation failed", { error: lastError instanceof Error ? lastError.name : "UnknownError" });
+  throw new MiningError("GENERATION_FAILED", "A geração falhou. Suas capturas continuam na fila.", 502);
 }
 
-async function expireGenerationAttempt(
-  database: Database,
-  userId: string,
-  captureId: string,
-  generationId: string,
-) {
-  return database.transaction(async (transaction) => {
-    const observedAt = new Date();
-    const expired = await transaction
-      .update(generation)
-      .set({ completedAt: new Date(), errorCode: "INTERRUPTED", status: "failed" })
-      .where(
-        and(
-          eq(generation.id, generationId),
-          eq(generation.userId, userId),
-          eq(generation.status, "running"),
-          lte(generation.leaseExpiresAt, observedAt),
-        ),
-      )
-      .returning({ id: generation.id });
-    if (expired.length === 0) {
-      return false;
-    }
-    const [latest] = await transaction
-      .select({ id: generation.id })
-      .from(generation)
-      .where(and(eq(generation.captureId, captureId), eq(generation.userId, userId)))
-      .orderBy(desc(generation.createdAt));
-    if (latest?.id === generationId) {
-      await transaction
-        .update(capture)
-        .set({ status: "inbox", updatedAt: new Date() })
-        .where(and(eq(capture.id, captureId), eq(capture.userId, userId)));
-    }
-    return true;
-  });
-}
+async function reserve(database: Database, userId: string, captureIds: string[], operationId: string) {
+  const existing = await database
+    .select({ captureId: generation.captureId, status: generation.status })
+    .from(generation)
+    .where(and(eq(generation.userId, userId), eq(generation.id, operationId)));
+  if (existing[0]) {
+    if (existing[0].status === "succeeded") return null;
+    throw new MiningError("GENERATION_RUNNING", "A geração já está em andamento.", 409);
+  }
 
-async function reserveGeneration(
-  database: Database,
-  userId: string,
-  captureId: string,
-  generationId: string,
-  model: string,
-  dailyLimit: number | null,
-  operationTimeoutMs: number,
-) {
   return database.transaction(async (transaction) => {
-    const day = new Date().toISOString().slice(0, 10);
-    await transaction.execute(sql`select pg_advisory_xact_lock(hashtext(${`${userId}:${day}`}))`);
-
-    const [captureRow] = await transaction
+    const captures = await transaction
       .select()
       .from(capture)
-      .where(and(eq(capture.id, captureId), eq(capture.userId, userId)));
-    if (!captureRow) {
-      throw new MiningError("CAPTURE_NOT_FOUND", "Captura não encontrada.", 404);
+      .where(and(eq(capture.userId, userId), inArray(capture.id, captureIds)));
+    if (captures.length !== captureIds.length || captures.some((item) => item.status === "approved" || item.status === "generating")) {
+      throw new MiningError("INVALID_GENERATION_CAPTURES", "Escolha capturas que possam ser geradas.", 409);
     }
-    if (captureRow.status === "approved") {
-      throw new MiningError("CAPTURE_APPROVED", "Esta captura já foi aprovada.", 409);
-    }
-    if (captureRow.status === "ready_for_review") {
-      throw new MiningError("GENERATION_READY", "Esta captura já possui frases para revisar.", 409);
-    }
-    if (captureRow.status === "generating") {
-      const observedAt = new Date();
-      const [running] = await transaction
-        .select()
-        .from(generation)
-        .where(
-          and(
-            eq(generation.captureId, captureId),
-            eq(generation.userId, userId),
-            eq(generation.status, "running"),
-          ),
-        )
-        .orderBy(desc(generation.createdAt));
-      if (running && running.leaseExpiresAt > observedAt) {
-        throw new MiningError("GENERATION_RUNNING", "Já existe uma geração em andamento.", 409);
-      }
-      if (running) {
-        const expired = await transaction
-          .update(generation)
-          .set({ completedAt: new Date(), errorCode: "INTERRUPTED", status: "failed" })
-          .where(
-            and(
-              eq(generation.id, running.id),
-              eq(generation.userId, userId),
-              eq(generation.status, "running"),
-              lte(generation.leaseExpiresAt, observedAt),
-            ),
-          )
-          .returning({ id: generation.id });
-        if (expired.length === 0) {
-          throw new MiningError("GENERATION_RUNNING", "Já existe uma geração em andamento.", 409);
-        }
-      }
-    }
-
-    if (dailyLimit !== null) {
-      const startOfDay = new Date(`${day}T00:00:00.000Z`);
-      const [usage] = await transaction
-        .select({ value: count() })
-        .from(generation)
-        .where(and(eq(generation.userId, userId), gte(generation.createdAt, startOfDay)));
-      if (usage.value >= dailyLimit) {
-        throw new MiningError(
-          "GENERATION_LIMIT_REACHED",
-          "Seu limite de gerações foi atingido. Tente novamente amanhã.",
-          429,
-        );
-      }
-    }
-
-    await transaction.insert(generation).values({
-      captureId,
-      id: generationId,
-      leaseExpiresAt: new Date(Date.now() + operationTimeoutMs),
-      model,
-      promptVersion: PROMPT_VERSION,
-      userId,
-    });
+    const generations = captures.map((item, index) => ({ captureId: item.id, id: index === 0 ? operationId : randomUUID() }));
+    await transaction.insert(generation).values(
+      generations.map((item) => ({
+        captureId: item.captureId,
+        id: item.id,
+        leaseExpiresAt: new Date(Date.now() + generationTimeoutMs),
+        model: DEFAULT_MODEL,
+        promptVersion: PROMPT_VERSION,
+        userId,
+      })),
+    );
     await transaction
       .update(capture)
       .set({ status: "generating", updatedAt: new Date() })
-      .where(and(eq(capture.id, captureId), eq(capture.userId, userId)));
-    return captureRow;
+      .where(and(eq(capture.userId, userId), inArray(capture.id, captureIds)));
+    return { captures, generations };
   });
 }

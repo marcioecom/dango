@@ -9,6 +9,9 @@ export class MiningError extends Error {
 }
 
 export function miningErrorResponse(error: unknown) {
+  if (error instanceof Response) {
+    return error;
+  }
   if (error instanceof MiningError) {
     return Response.json({ code: error.code, error: error.message }, { status: error.status });
   }

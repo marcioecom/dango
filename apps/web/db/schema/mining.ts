@@ -2,6 +2,7 @@ import {
   index,
   integer,
   jsonb,
+  primaryKey,
   pgTable,
   text,
   timestamp,
@@ -10,6 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { user } from "./auth";
+import type { GenerationExample, GenerationTranslation } from "@dango/domain";
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -27,6 +29,7 @@ export const capture = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     text: text("text").notNull(),
+    kind: text("kind").default("term").notNull(),
     normalizedText: text("normalized_text").notNull(),
     originalSentence: text("original_sentence"),
     source: text("source"),
@@ -52,9 +55,12 @@ export const generation = pgTable(
     status: text("status").default("running").notNull(),
     model: text("model").notNull(),
     promptVersion: text("prompt_version").notNull(),
-    explanation: text("explanation"),
-    translation: text("translation"),
-    sentences: jsonb("sentences").$type<string[]>(),
+    ambiguityNotePtBr: text("ambiguity_note_pt_br"),
+    examples: jsonb("examples").$type<GenerationExample[]>(),
+    explanationPtBr: text("explanation_pt_br"),
+    originalSentenceTranslationPtBr: text("original_sentence_translation_pt_br"),
+    sentenceTranslationPtBr: text("sentence_translation_pt_br"),
+    translationsPtBr: jsonb("translations_pt_br").$type<GenerationTranslation[]>(),
     errorCode: text("error_code"),
     leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }).notNull(),
     completedAt: timestamp("completed_at", { withTimezone: true }),
@@ -107,4 +113,31 @@ export const approval = pgTable(
   ],
 );
 
-export const miningSchema = { approval, capture, generation, generationUsage };
+export const miningSession = pgTable(
+  "mining_session",
+  {
+    id: uuid("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("mining_session_user_created_idx").on(table.userId, table.createdAt)],
+);
+
+export const miningSessionItem = pgTable(
+  "mining_session_item",
+  {
+    sessionId: uuid("session_id")
+      .notNull()
+      .references(() => miningSession.id, { onDelete: "cascade" }),
+    captureId: uuid("capture_id")
+      .notNull()
+      .references(() => capture.id, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.sessionId, table.captureId] })],
+);
+
+export const miningSchema = { approval, capture, generation, generationUsage, miningSession, miningSessionItem };

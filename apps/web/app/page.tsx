@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
-import { getCurrentSession } from "@/modules/auth/server/current-session";
+import { getSession } from "@/modules/auth/server/auth-utils";
 
 export default async function Home() {
-  redirect((await getCurrentSession()) ? "/inbox" : "/sign-in");
+  redirect((await getSession()) ? "/inbox" : "/sign-in");
 }

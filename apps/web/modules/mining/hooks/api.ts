@@ -1,4 +1,4 @@
-import type { ApproveCaptureInput, Capture, CreateCaptureInput } from "@dango/domain";
+import type { ApproveCaptureInput, Capture, CreateCaptureInput, MiningSession } from "@dango/domain";
 
 export class ApiError extends Error {
   constructor(
@@ -28,6 +28,13 @@ export async function generateCapture(captureId: string, id: string) {
   });
 }
 
+export async function generateCaptures(captureIds: string[], id: string) {
+  return request<Capture[]>("/api/generations", {
+    body: JSON.stringify({ captureIds, id }),
+    method: "POST",
+  });
+}
+
 export async function approveCapture(captureId: string, input: ApproveCaptureInput) {
   return request<Capture>(`/api/captures/${captureId}/approval`, {
     body: JSON.stringify(input),
@@ -35,7 +42,28 @@ export async function approveCapture(captureId: string, input: ApproveCaptureInp
   });
 }
 
-async function request<T>(url: string, init?: RequestInit): Promise<T> {
+export async function decideCapture(
+  captureId: string,
+  action: "defer" | "discard" | "restore" | "undo_approval",
+) {
+  return request<Capture>(`/api/captures/${captureId}/decision`, {
+    body: JSON.stringify({ action }),
+    method: "POST",
+  });
+}
+
+export async function createMiningSession(input: { captureIds: string[]; id: string }) {
+  return request<MiningSession>("/api/sessions", {
+    body: JSON.stringify(input),
+    method: "POST",
+  });
+}
+
+export async function getMiningSession(sessionId: string) {
+  return request<MiningSession>(`/api/sessions/${sessionId}`);
+}
+
+export async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...init,
     credentials: "same-origin",

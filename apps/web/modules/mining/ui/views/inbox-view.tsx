@@ -1,11 +1,7 @@
-import { CaptureForm } from "../components/capture-form";
-import { CaptureQueue } from "../components/capture-queue";
+import { CaptureList } from "../components/capture-list";
 
 export function InboxView() {
   return (
-    <>
-      <CaptureForm />
-      <CaptureQueue />
-    </>
+    <CaptureList status="inbox" />
   );
 }

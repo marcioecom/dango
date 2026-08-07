@@ -71,25 +71,31 @@ function ReviewForm({ capture }: { capture: Capture }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const generation = capture.generation!;
-  const originalIsValid = Boolean(
+  const hasOriginalContext = capture.kind === "term" && Boolean(
     capture.originalSentence && sentenceContainsTarget(capture.originalSentence, capture.text),
   );
+  const isSentence = capture.kind === "sentence";
   const options = [
-    ...(originalIsValid && capture.originalSentence
-      ? [{ key: "original", label: t("originalOption"), sentence: capture.originalSentence }]
+    ...(isSentence
+      ? [{ key: "original", label: t("capturedSentence"), sentence: capture.text, translation: generation.sentenceTranslationPtBr ?? null }]
+      : hasOriginalContext && capture.originalSentence
+        ? [{ key: "original", label: t("originalOption"), sentence: capture.originalSentence, translation: generation.originalSentenceTranslationPtBr ?? null }]
       : []),
-    ...generation.sentences.map((sentence, index) => ({
+    ...generation.examples.slice(0, isSentence || hasOriginalContext ? 4 : 5).map((example, index) => ({
       key: `generated-${index}`,
       label: `${index + 1}`,
-      sentence,
+      sentence: example.sentenceEn,
+      translation: example.translationPtBr,
     })),
   ];
-  const [selectedKey, setSelectedKey] = useState(options[0]?.key ?? "");
-  const [sentence, setSentence] = useState(options[0]?.sentence ?? "");
-  const [baseSentence, setBaseSentence] = useState(options[0]?.sentence ?? "");
+  const [selectedKey, setSelectedKey] = useState(isSentence ? options[0]?.key ?? "" : "");
+  const [sentence, setSentence] = useState(isSentence ? options[0]?.sentence ?? "" : "");
+  const [baseSentence, setBaseSentence] = useState(isSentence ? options[0]?.sentence ?? "" : "");
   const [baseSource, setBaseSource] = useState<ApprovalSource>(
-    options[0]?.key === "original" ? "original" : "generated",
+    isSentence ? "original" : "generated",
   );
+  const [showTranslations, setShowTranslations] = useState(false);
+  const [showContexts, setShowContexts] = useState(!isSentence);
   const approvalId = useRef<string | null>(null);
 
   const approval = useMutation({
@@ -123,36 +129,63 @@ function ReviewForm({ capture }: { capture: Capture }) {
 
   return (
     <section className="mt-10 pb-10" aria-labelledby="review-title">
-      <p className="text-sm font-semibold text-primary">{capture.text}</p>
-      <h1 id="review-title" className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-balance">
-        {t("reviewTitle")}
+      <p className="text-sm font-medium text-muted-foreground">
+        {isSentence ? t("reviewSentenceLabel") : t("reviewTargetLabel")}
+      </p>
+      <h1 id="review-title" className="mt-1 text-3xl font-semibold tracking-[-0.035em] text-balance">
+        {capture.text}
       </h1>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("reviewHint")}</p>
-
-      <div className="mt-7 bg-accent px-4 py-5">
-        <p className="text-sm leading-6">{generation.explanation}</p>
-        <p className="mt-3 text-sm font-medium">{generation.translation}</p>
+      <div className="mt-7 border border-primary/30 bg-primary/10 px-5 py-5">
+        <p className="text-base leading-7 text-foreground">{generation.explanationPtBr}</p>
+        {isSentence ? (
+          <p className="mt-4 text-sm font-semibold text-primary">{generation.sentenceTranslationPtBr}</p>
+        ) : (
+          <p className="mt-4 text-sm font-semibold text-primary">
+            {generation.translationsPtBr.map((translation) => translation.text).join(", ")}
+          </p>
+        )}
+        {generation.ambiguityNotePtBr ? (
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">{generation.ambiguityNotePtBr}</p>
+        ) : null}
       </div>
 
-      <fieldset className="mt-7 divide-y divide-border border-y border-border">
+      <div className="mt-8 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold">{isSentence ? t("otherContexts") : t("reviewTitle")}</h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("reviewHint")}</p>
+        </div>
+        {isSentence ? (
+          <Button size="sm" type="button" variant="ghost" onClick={() => setShowContexts((value) => !value)}>
+            {showContexts ? t("hideOtherContexts") : t("showOtherContexts")}
+          </Button>
+        ) : null}
+      </div>
+      {showContexts ? <TranslationToggle expanded={showTranslations} onClick={() => setShowTranslations((value) => !value)} /> : null}
+
+      <fieldset className="mt-3 divide-y divide-border border-y border-border">
         <legend className="sr-only">{t("reviewTitle")}</legend>
-        {options.map((option) => (
-          <label className="flex min-h-14 cursor-pointer items-start gap-3 py-4" key={option.key}>
+        {(showContexts ? options : options.slice(0, 1)).map((option) => (
+          <label className="grid min-h-14 cursor-pointer grid-cols-[1rem_4.5rem_minmax(0,1fr)] items-start gap-3 py-4" key={option.key}>
             <input
-              className="mt-1 size-4 accent-primary"
+              className="mt-1.5 size-4 accent-primary"
               type="radio"
               name="sentence-option"
               value={option.key}
               checked={selectedKey === option.key}
               onChange={() => choose(option)}
             />
-            <span>
-              <span className="block text-xs font-semibold text-muted-foreground">{option.label}</span>
-              <span className="mt-1 block leading-7">{option.sentence}</span>
+            <span className="pt-0.5 text-xs leading-5 font-semibold text-muted-foreground">{option.label}</span>
+            <span className="min-w-0">
+              <span className="block leading-7">{option.sentence}</span>
+              {showTranslations && option.translation ? (
+                <span className="mt-1 block text-sm text-muted-foreground">{option.translation}</span>
+              ) : null}
             </span>
           </label>
         ))}
       </fieldset>
+
+      {showContexts ? <TranslationToggle expanded={showTranslations} onClick={() => setShowTranslations((value) => !value)} /> : null}
 
       <label className="mt-7 block text-sm font-semibold" htmlFor="final-sentence">
         {t("selectedSentence")}
@@ -179,5 +212,22 @@ function ReviewForm({ capture }: { capture: Capture }) {
         {approval.isPending ? t("approving") : t("approve")}
       </Button>
     </section>
+  );
+}
+
+function TranslationToggle({ expanded, onClick }: { expanded: boolean; onClick: () => void }) {
+  const { t } = useTranslation();
+
+  return (
+    <Button
+      aria-pressed={expanded}
+      className="mt-3"
+      size="sm"
+      type="button"
+      variant="ghost"
+      onClick={onClick}
+    >
+      {expanded ? t("hideExampleTranslations") : t("showExampleTranslations")}
+    </Button>
   );
 }

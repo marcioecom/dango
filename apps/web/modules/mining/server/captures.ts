@@ -15,7 +15,8 @@ export async function createCapture(database: Database, userId: string, input: C
     .values({
       id: input.id,
       normalizedText: normalizeCaptureText(input.text),
-      originalSentence: input.originalSentence ?? null,
+       kind: input.kind,
+       originalSentence: input.kind === "term" ? input.originalSentence ?? null : null,
       source: input.source ?? null,
       text: input.text,
       userId,
@@ -33,7 +34,8 @@ export async function createCapture(database: Database, userId: string, input: C
 
   if (
     saved.text !== input.text ||
-    saved.originalSentence !== (input.originalSentence ?? null) ||
+    saved.kind !== input.kind ||
+    saved.originalSentence !== (input.kind === "term" ? input.originalSentence ?? null : null) ||
     saved.source !== (input.source ?? null)
   ) {
     throw new MiningError(
@@ -121,16 +123,20 @@ function serializeCapture(
           completedAt: generated.completedAt?.toISOString() ?? null,
           createdAt: generated.createdAt.toISOString(),
           errorCode: generated.errorCode,
-          explanation: generated.explanation ?? "",
+          ambiguityNotePtBr: generated.ambiguityNotePtBr ?? undefined,
           id: generated.id,
+          examples: generated.examples ?? [],
+          explanationPtBr: generated.explanationPtBr ?? "",
+          originalSentenceTranslationPtBr: generated.originalSentenceTranslationPtBr ?? undefined,
           model: generated.model,
           promptVersion: generated.promptVersion,
-          sentences: generated.sentences ?? [],
           status: generated.status as "running" | "succeeded" | "failed",
-          translation: generated.translation ?? "",
+          translationsPtBr: generated.translationsPtBr ?? [],
+          sentenceTranslationPtBr: generated.sentenceTranslationPtBr ?? undefined,
         }
       : null,
     id: item.id,
+    kind: item.kind as Capture["kind"],
     originalSentence: item.originalSentence,
     source: item.source,
     status: item.status as Capture["status"],

@@ -14,7 +14,6 @@ export default defineConfig({
   test: {
     env: {
       AI_GATEWAY_API_KEY: "gateway-key",
-      AI_GENERATION_TIMEOUT_SECONDS: "60",
       AUTH_ALLOWED_EMAILS: "ana@example.com",
       AUTH_EMAIL_FROM: "Dango <conta@example.com>",
       AUTH_TRUSTED_ORIGINS: "http://localhost:1420,tauri://localhost",

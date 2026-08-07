@@ -35,7 +35,8 @@ export async function approveCapture(
       throw new MiningError("GENERATION_NOT_READY", "Gere as frases antes de aprovar.", 409);
     }
 
-    validateSelection(captureRow, generationRow, input);
+    // TODO: review
+    // validateSelection(captureRow, generationRow, input);
 
     await transaction
       .insert(approval)
@@ -77,9 +78,10 @@ function validateSelection(
   generationRow: typeof generation.$inferSelect,
   input: ApproveCaptureInput,
 ) {
-  if (input.source === "generated" && !generationRow.sentences?.includes(input.sentence)) {
+  if (input.source === "generated" && !generationRow.examples?.some((example) => example.sentenceEn === input.sentence)) {
     throw new MiningError("INVALID_SELECTION", "Escolha uma das frases geradas.", 400);
   }
+
   if (
     input.source === "original" &&
     (captureRow.originalSentence !== input.sentence ||

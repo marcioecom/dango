@@ -1,12 +1,7 @@
-import { redirect } from "next/navigation";
-
 import { LoginView } from "@/modules/auth/ui/views/login-view";
-import { getCurrentSession } from "@/modules/auth/server/current-session";
+import { requireUnauth } from "@/modules/auth/server/auth-utils";
 
 export default async function LoginPage() {
-  if (await getCurrentSession()) {
-    redirect("/inbox");
-  }
-
+  await requireUnauth();
   return <LoginView />;
 }
