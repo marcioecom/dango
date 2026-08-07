@@ -5,7 +5,17 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "DATABASE_URL",
+        "AUTH_ALLOWED_EMAILS",
+        "AUTH_EMAIL_FROM",
+        "AUTH_TRUSTED_ORIGINS",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "AI_GATEWAY_API_KEY",
+        "RESEND_API_KEY"
+      ]
     },
     "check": {
       "dependsOn": ["^check"]
