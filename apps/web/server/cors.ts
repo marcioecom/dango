@@ -3,7 +3,8 @@ import { env } from "@/lib/env";
 const allowedMethods = "GET, POST, OPTIONS";
 const allowedHeaders = "Authorization, Content-Type";
 const allowedOrigins = new Set(
-  [env.BETTER_AUTH_URL, ...env.AUTH_TRUSTED_ORIGINS.split(",")]
+  // [env.BETTER_AUTH_URL, ...env.AUTH_TRUSTED_ORIGINS.split(",")]
+  [env.BETTER_AUTH_URL]
     .map((origin) => origin.trim())
     .filter(Boolean),
 );
@@ -36,6 +37,7 @@ export function preflight(request: Request) {
   return withCors(request, new Response(null, { status: 204 }));
 }
 
+// TODO: remove this
 export function assertJsonMutation(request: Request) {
   const origin = request.headers.get("origin");
   const isBearerRequest = request.headers.get("authorization")?.startsWith("Bearer ") ?? false;

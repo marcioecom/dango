@@ -2,16 +2,16 @@ import {
   index,
   integer,
   jsonb,
-  primaryKey,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
-import { user } from "./auth";
 import type { GenerationExample, GenerationTranslation } from "@dango/domain";
+import { users } from "./auth";
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -27,7 +27,7 @@ export const capture = pgTable(
     id: uuid("id").primaryKey(),
     userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     text: text("text").notNull(),
     kind: text("kind").default("term").notNull(),
     normalizedText: text("normalized_text").notNull(),
@@ -51,7 +51,7 @@ export const generation = pgTable(
       .references(() => capture.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     status: text("status").default("running").notNull(),
     model: text("model").notNull(),
     promptVersion: text("prompt_version").notNull(),
@@ -78,7 +78,7 @@ export const generationUsage = pgTable(
       .references(() => generation.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     model: text("model").notNull(),
     outcome: text("outcome").notNull(),
     inputTokens: integer("input_tokens"),
@@ -102,7 +102,7 @@ export const approval = pgTable(
       .references(() => generation.id, { onDelete: "restrict" }),
     userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     sentence: text("sentence").notNull(),
     source: text("source").notNull(),
     approvedAt: timestamp("approved_at", { withTimezone: true }).defaultNow().notNull(),
@@ -119,7 +119,7 @@ export const miningSession = pgTable(
     id: uuid("id").primaryKey(),
     userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
