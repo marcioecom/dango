@@ -12,6 +12,7 @@ const resend = new Resend(env.RESEND_API_KEY);
 export const auth = betterAuth({
   appName: "Dango",
   baseURL: env.BETTER_AUTH_URL,
+  trustedOrigins: [env.BETTER_AUTH_URL, ...env.AUTH_TRUSTED_ORIGINS],
   database: drizzleAdapter(database, {
     provider: "pg",
     schema: authSchema,

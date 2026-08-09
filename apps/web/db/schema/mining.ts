@@ -21,6 +21,7 @@ const timestamps = {
     .notNull(),
 };
 
+// TODO: refactor to use tables as plural
 export const capture = pgTable(
   "capture",
   {

@@ -2,12 +2,7 @@ import { env } from "@/lib/env";
 
 const allowedMethods = "GET, POST, OPTIONS";
 const allowedHeaders = "Authorization, Content-Type";
-const allowedOrigins = new Set(
-  // [env.BETTER_AUTH_URL, ...env.AUTH_TRUSTED_ORIGINS.split(",")]
-  [env.BETTER_AUTH_URL]
-    .map((origin) => origin.trim())
-    .filter(Boolean),
-);
+const allowedOrigins = new Set([env.BETTER_AUTH_URL, ...env.AUTH_TRUSTED_ORIGINS]);
 
 function getAllowedOrigin(request: Request) {
   const origin = request.headers.get("origin");

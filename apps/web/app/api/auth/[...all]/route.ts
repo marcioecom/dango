@@ -13,6 +13,4 @@ export async function POST(request: Request) {
   return withCors(request, await handler.POST(request));
 }
 
-export function OPTIONS(request: Request) {
-  return preflight(request);
-}
+export const OPTIONS = preflight
