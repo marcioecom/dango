@@ -5,8 +5,8 @@ import { Button } from "@dango/ui/components/button";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
-import { useCaptureDecision } from "../../../shared/hooks/use-capture-decision";
-import { useGenerateCapture } from "../../../shared/hooks/use-generate-capture";
+import { useCaptureDecision } from "@/modules/mining/shared/hooks/use-capture-decision";
+import { useGenerateCapture } from "@/modules/mining/shared/hooks/use-generate-capture";
 
 export function CaptureListItem({
   capture,
@@ -45,7 +45,9 @@ export function CaptureListItem({
         ) : null}
         <div className="min-w-0">
           <h3 className="font-semibold break-words">{capture.text}</h3>
-          <p className="mt-1 text-xs font-medium text-muted-foreground">{status}</p>
+          <p className="mt-1 text-xs font-medium text-muted-foreground">
+            {status}
+          </p>
           {capture.approval ? (
             <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
               {capture.approval.sentence}
@@ -81,7 +83,9 @@ export function CaptureListItem({
               type="button"
               variant="outline"
               disabled={decision.isPending}
-              onClick={() => decision.mutate({ action: "restore", captureId: capture.id })}
+              onClick={() =>
+                decision.mutate({ action: "restore", captureId: capture.id })
+              }
             >
               {t("restore")}
             </Button>
@@ -92,7 +96,12 @@ export function CaptureListItem({
               type="button"
               variant="outline"
               disabled={decision.isPending}
-              onClick={() => decision.mutate({ action: "undo_approval", captureId: capture.id })}
+              onClick={() =>
+                decision.mutate({
+                  action: "undo_approval",
+                  captureId: capture.id,
+                })
+              }
             >
               {t("undoApproval")}
             </Button>

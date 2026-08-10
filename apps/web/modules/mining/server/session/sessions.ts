@@ -4,7 +4,7 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 import type { Database } from "@/db";
 import { captures, miningSessionItems, miningSessions } from "@/db/schema/mining";
 
-import { MiningError } from "../../shared/server/errors";
+import { MiningError } from "@/modules/mining/shared/server/errors";
 
 export async function createMiningSession(
   database: Database,

@@ -5,9 +5,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { createMiningSession, generateCaptures } from "../../shared/hooks/api";
-import { miningQueryKeys } from "../../shared/hooks/query-keys";
-import { capturesQuery } from "../../shared/hooks/queries";
+import { createMiningSession, generateCaptures } from "@/modules/mining/shared/hooks/api";
+import { miningQueryKeys } from "@/modules/mining/shared/hooks/query-keys";
+import { capturesQuery } from "@/modules/mining/shared/hooks/queries";
 import type { CaptureListStatus } from "../types";
 
 const inboxStatuses: Capture["status"][] = [

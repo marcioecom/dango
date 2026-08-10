@@ -10,9 +10,19 @@ import { ReviewView } from "../../../review/ui/views/review-view";
 
 export function SessionView({ sessionId }: { sessionId: string }) {
   const { t } = useTranslation();
-  const { captures, current, currentIndex, decision, session, sessionCaptures } = useMiningSession(sessionId);
+  const {
+    captures,
+    current,
+    currentIndex,
+    decision,
+    session,
+    sessionCaptures,
+  } = useMiningSession(sessionId);
 
-  if ((session.isLoading && !session.data) || (captures.isLoading && !captures.data)) {
+  if (
+    (session.isLoading && !session.data) ||
+    (captures.isLoading && !captures.data)
+  ) {
     return <Skeleton className="mt-10 h-72 w-full" />;
   }
   if (session.isError || captures.isError || !session.data || !captures.data) {
@@ -29,7 +39,10 @@ export function SessionView({ sessionId }: { sessionId: string }) {
   return (
     <>
       <p className="text-sm font-medium text-muted-foreground">
-        {t("sessionProgress", { current: currentIndex + 1, total: sessionCaptures.length })}
+        {t("sessionProgress", {
+          current: currentIndex + 1,
+          total: sessionCaptures.length,
+        })}
       </p>
       <ReviewView captureId={current.id} key={current.id} />
       <div className="mt-4 flex items-center gap-2">
@@ -38,7 +51,9 @@ export function SessionView({ sessionId }: { sessionId: string }) {
           type="button"
           variant="ghost"
           disabled={decision.isPending}
-          onClick={() => decision.mutate({ action: "defer", captureId: current.id })}
+          onClick={() =>
+            decision.mutate({ action: "defer", captureId: current.id })
+          }
         >
           {t("defer")}
         </Button>
@@ -47,7 +62,9 @@ export function SessionView({ sessionId }: { sessionId: string }) {
           type="button"
           variant="ghost"
           disabled={decision.isPending}
-          onClick={() => decision.mutate({ action: "discard", captureId: current.id })}
+          onClick={() =>
+            decision.mutate({ action: "discard", captureId: current.id })
+          }
         >
           {t("discard")}
         </Button>

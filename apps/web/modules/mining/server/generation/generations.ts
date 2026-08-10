@@ -5,8 +5,8 @@ import { and, eq, inArray } from "drizzle-orm";
 import type { Database } from "@/db";
 import { captures, generationUsages, generations } from "@/db/schema/mining";
 
-import { getCapture, listCaptures } from "../../shared/server/captures";
-import { MiningError } from "../../shared/server/errors";
+import { getCapture, listCaptures } from "@/modules/mining/shared/server/captures";
+import { MiningError } from "@/modules/mining/shared/server/errors";
 import {
   DEFAULT_MODEL,
   PROMPT_VERSION,

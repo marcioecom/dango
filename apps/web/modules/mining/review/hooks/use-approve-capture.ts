@@ -4,8 +4,8 @@ import type { ApproveCaptureInput } from "@dango/domain";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 
-import { ApiError, approveCapture } from "../../shared/hooks/api";
-import { miningQueryKeys } from "../../shared/hooks/query-keys";
+import { ApiError, approveCapture } from "@/modules/mining/shared/hooks/api";
+import { miningQueryKeys } from "@/modules/mining/shared/hooks/query-keys";
 
 export function useApproveCapture(captureId: string) {
   const queryClient = useQueryClient();

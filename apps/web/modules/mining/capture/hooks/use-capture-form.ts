@@ -6,8 +6,8 @@ import { useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
-import { ApiError, saveCapture } from "../../shared/hooks/api";
-import { miningQueryKeys } from "../../shared/hooks/query-keys";
+import { ApiError, saveCapture } from "@/modules/mining/shared/hooks/api";
+import { miningQueryKeys } from "@/modules/mining/shared/hooks/query-keys";
 
 const captureFormSchema = z.object({
   kind: z.enum(["sentence", "term"]),

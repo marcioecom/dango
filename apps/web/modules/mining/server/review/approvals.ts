@@ -3,8 +3,8 @@ import { and, eq } from "drizzle-orm";
 
 import type { Database } from "@/db";
 import { approvals, captures, generations } from "@/db/schema/mining";
-import { getCapture } from "../../shared/server/captures";
-import { MiningError } from "../../shared/server/errors";
+import { getCapture } from "@/modules/mining/shared/server/captures";
+import { MiningError } from "@/modules/mining/shared/server/errors";
 
 export async function approveCapture(
   database: Database,
