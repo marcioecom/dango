@@ -6,12 +6,16 @@ import { useState } from "react";
 import type { ReviewCapture, ReviewOption } from "../types";
 import { useApproveCapture } from "./use-approve-capture";
 
+// TODO: maybe use react-hook-form
 export function useReviewForm(capture: ReviewCapture) {
   const generation = capture.generation;
   const isSentence = capture.kind === "sentence";
   const hasOriginalContext =
     capture.kind === "term" &&
-    Boolean(capture.originalSentence && sentenceContainsTarget(capture.originalSentence, capture.text));
+    Boolean(
+      capture.originalSentence &&
+      sentenceContainsTarget(capture.originalSentence, capture.text),
+    );
   const options: ReviewOption[] = [
     ...(isSentence
       ? [
@@ -66,7 +70,8 @@ export function useReviewForm(capture: ReviewCapture) {
     approval.mutate({
       generationId: generation.id,
       sentence,
-      source: sentence === baseSelection.sentence ? baseSelection.source : "edited",
+      source:
+        sentence === baseSelection.sentence ? baseSelection.source : "edited",
     });
   }
 

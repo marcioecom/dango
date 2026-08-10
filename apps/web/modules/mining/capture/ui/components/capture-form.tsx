@@ -11,38 +11,56 @@ import { CaptureSavedNotice } from "./capture-saved-notice";
 export function CaptureForm() {
   const { t } = useTranslation();
   const {
-    dismissSavedCapture,
+    dismissSavedCapture, // --
     errors,
     handleSubmit,
     kind,
     register,
     save,
-    savedCaptureId,
+    savedCaptureId, // --
   } = useCaptureForm();
 
   return (
     <section aria-labelledby="capture-title">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 id="capture-title" className="text-2xl font-semibold tracking-[-0.03em]">
+          <h1
+            id="capture-title"
+            className="text-2xl font-semibold tracking-[-0.03em]"
+          >
             {t("captureTitle")}
           </h1>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("captureHint")}</p>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {t("captureHint")}
+          </p>
         </div>
       </div>
 
-      <form className="mt-6 space-y-4" onSubmit={handleSubmit((values) => save.mutate(values))}>
+      <form
+        className="mt-6 space-y-4"
+        onSubmit={handleSubmit((values) => save.mutate(values))}
+      >
         <fieldset>
           <legend className="sr-only">{t("captureKindLabel")}</legend>
           <div className="grid grid-cols-2 rounded-md border border-border p-1">
             <label className="cursor-pointer">
-              <input className="peer sr-only" type="radio" value="sentence" {...register("kind")} />
+              <input
+                className="peer sr-only"
+                type="radio"
+                value="sentence"
+                {...register("kind")}
+              />
               <span className="flex h-10 items-center justify-center rounded-sm text-sm font-medium text-muted-foreground peer-checked:bg-primary peer-checked:text-primary-foreground">
                 {t("captureKindSentence")}
               </span>
             </label>
             <label className="cursor-pointer">
-              <input className="peer sr-only" type="radio" value="term" {...register("kind")} />
+              <input
+                className="peer sr-only"
+                type="radio"
+                value="term"
+                {...register("kind")}
+              />
               <span className="flex h-10 items-center justify-center rounded-sm text-sm font-medium text-muted-foreground peer-checked:bg-primary peer-checked:text-primary-foreground">
                 {t("captureKindTerm")}
               </span>
@@ -57,7 +75,11 @@ export function CaptureForm() {
             id="capture-text"
             autoCapitalize="none"
             autoCorrect="off"
-            placeholder={kind === "sentence" ? t("sentencePlaceholder") : t("targetPlaceholder")}
+            placeholder={
+              kind === "sentence"
+                ? t("sentencePlaceholder")
+                : t("targetPlaceholder")
+            }
             aria-invalid={Boolean(errors.text)}
             {...register("text")}
           />
@@ -65,8 +87,10 @@ export function CaptureForm() {
         {kind === "term" ? (
           <div className="space-y-2">
             <Label htmlFor="original-sentence">
-              {t("originalSentence")} {" "}
-              <span className="font-normal text-muted-foreground">({t("optional")})</span>
+              {t("originalSentence")}{" "}
+              <span className="font-normal text-muted-foreground">
+                ({t("optional")})
+              </span>
             </Label>
             <textarea
               id="original-sentence"
@@ -76,16 +100,22 @@ export function CaptureForm() {
             />
           </div>
         ) : null}
+        {/* TODO: remove source input it's not been used */}
         <div className="space-y-2">
           <Label htmlFor="source">
-            {t("source")} {" "}
-            <span className="font-normal text-muted-foreground">({t("optional")})</span>
+            {t("source")}{" "}
+            <span className="font-normal text-muted-foreground">
+              ({t("optional")})
+            </span>
           </Label>
           <Input id="source" {...register("source")} />
         </div>
 
         {save.isError ? (
-          <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">
+          <p
+            className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
             {t("captureError")}
           </p>
         ) : null}
@@ -95,8 +125,12 @@ export function CaptureForm() {
         </Button>
       </form>
 
+      {/* TODO: use toaser instead of notice */}
       {savedCaptureId ? (
-        <CaptureSavedNotice captureId={savedCaptureId} onDismiss={dismissSavedCapture} />
+        <CaptureSavedNotice
+          captureId={savedCaptureId}
+          onDismiss={dismissSavedCapture}
+        />
       ) : null}
     </section>
   );
