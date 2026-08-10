@@ -45,7 +45,7 @@ export const generationExampleSchema = z.object({
 
 export const generationOutputSchema = z.object({
   ambiguityNotePtBr: z.string().trim().min(1).optional(),
-  examples: z.array(generationExampleSchema).min(4).max(5),
+  examples: z.array(generationExampleSchema).length(5),
   explanationPtBr: z.string().trim().min(1),
   translationsPtBr: z.array(generationTranslationSchema).default([]),
   originalSentenceTranslationPtBr: z.string().trim().min(1).optional(),
@@ -108,7 +108,6 @@ export const captureListSchema = z.object({ captures: z.array(captureSchema) });
 
 export const miningSessionSchema = z.object({
   captureIds: z.array(z.uuid()).min(1),
-  completedAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
   id: z.uuid(),
 });

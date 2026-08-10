@@ -3,8 +3,8 @@ import { z } from "zod";
 
 import { database } from "@/db/runtime";
 import { requireUser } from "@/modules/auth/server/auth-utils";
-import { approveCapture } from "@/modules/mining/server/approvals";
-import { MiningError, miningErrorResponse, parseJsonRequest } from "@/modules/mining/server/errors";
+import { approveCapture } from "@/modules/mining/server/review/approvals";
+import { MiningError, miningErrorResponse, parseJsonRequest } from "@/modules/mining/shared/server/errors";
 import { assertJsonMutation, preflight, withCors } from "@/server/cors";
 
 export async function POST(

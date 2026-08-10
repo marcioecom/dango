@@ -1,10 +1,10 @@
 import { and, eq } from "drizzle-orm";
 
 import type { Database } from "@/db";
-import { approval, capture } from "@/db/schema/mining";
+import { approvals, captures } from "@/db/schema/mining";
 
-import { getCapture } from "./captures";
-import { MiningError } from "./errors";
+import { getCapture } from "../../shared/server/captures";
+import { MiningError } from "../../shared/server/errors";
 
 export async function decideCapture(
   database: Database,
@@ -15,19 +15,19 @@ export async function decideCapture(
   await database.transaction(async (transaction) => {
     const [captureRow] = await transaction
       .select()
-      .from(capture)
-      .where(and(eq(capture.id, captureId), eq(capture.userId, userId)));
+      .from(captures)
+      .where(and(eq(captures.id, captureId), eq(captures.userId, userId)));
     if (!captureRow) throw new MiningError("CAPTURE_NOT_FOUND", "Captura não encontrada.", 404);
 
     if (action === "undo_approval") {
       if (captureRow.status !== "approved") {
         throw new MiningError("APPROVAL_NOT_FOUND", "Esta captura não está aprovada.", 409);
       }
-      await transaction.delete(approval).where(and(eq(approval.captureId, captureId), eq(approval.userId, userId)));
+      await transaction.delete(approvals).where(and(eq(approvals.captureId, captureId), eq(approvals.userId, userId)));
       await transaction
-        .update(capture)
+        .update(captures)
         .set({ status: "ready_for_review", updatedAt: new Date() })
-        .where(and(eq(capture.id, captureId), eq(capture.userId, userId)));
+        .where(and(eq(captures.id, captureId), eq(captures.userId, userId)));
       return;
     }
 
@@ -39,9 +39,9 @@ export async function decideCapture(
       throw new MiningError("CAPTURE_NOT_READY", "Escolha uma captura pronta para revisão.", 409);
     }
     await transaction
-      .update(capture)
+      .update(captures)
       .set({ status: nextStatus, updatedAt: new Date() })
-      .where(and(eq(capture.id, captureId), eq(capture.userId, userId)));
+      .where(and(eq(captures.id, captureId), eq(captures.userId, userId)));
   });
 
   return getCapture(database, userId, captureId);

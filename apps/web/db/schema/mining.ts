@@ -21,9 +21,8 @@ const timestamps = {
     .notNull(),
 };
 
-// TODO: refactor to use tables as plural
-export const capture = pgTable(
-  "capture",
+export const captures = pgTable(
+  "captures",
   {
     id: uuid("id").primaryKey(),
     userId: text("user_id")
@@ -38,18 +37,18 @@ export const capture = pgTable(
     ...timestamps,
   },
   (table) => [
-    index("capture_user_status_updated_idx").on(table.userId, table.status, table.updatedAt),
-    index("capture_user_normalized_text_idx").on(table.userId, table.normalizedText),
+    index("captures_user_status_updated_idx").on(table.userId, table.status, table.updatedAt),
+    index("captures_user_normalized_text_idx").on(table.userId, table.normalizedText),
   ],
 );
 
-export const generation = pgTable(
-  "generation",
+export const generations = pgTable(
+  "generations",
   {
     id: uuid("id").primaryKey(),
     captureId: uuid("capture_id")
       .notNull()
-      .references(() => capture.id, { onDelete: "cascade" }),
+      .references(() => captures.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -63,20 +62,19 @@ export const generation = pgTable(
     sentenceTranslationPtBr: text("sentence_translation_pt_br"),
     translationsPtBr: jsonb("translations_pt_br").$type<GenerationTranslation[]>(),
     errorCode: text("error_code"),
-    leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }).notNull(),
     completedAt: timestamp("completed_at", { withTimezone: true }),
     ...timestamps,
   },
-  (table) => [index("generation_user_capture_created_idx").on(table.userId, table.captureId, table.createdAt)],
+  (table) => [index("generations_user_capture_created_idx").on(table.userId, table.captureId, table.createdAt)],
 );
 
-export const generationUsage = pgTable(
-  "generation_usage",
+export const generationUsages = pgTable(
+  "generation_usages",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     generationId: uuid("generation_id")
       .notNull()
-      .references(() => generation.id, { onDelete: "cascade" }),
+      .references(() => generations.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -88,19 +86,19 @@ export const generationUsage = pgTable(
     latencyMs: integer("latency_ms").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index("generation_usage_user_created_idx").on(table.userId, table.createdAt)],
+  (table) => [index("generation_usages_user_created_idx").on(table.userId, table.createdAt)],
 );
 
-export const approval = pgTable(
-  "approval",
+export const approvals = pgTable(
+  "approvals",
   {
     id: uuid("id").primaryKey(),
     captureId: uuid("capture_id")
       .notNull()
-      .references(() => capture.id, { onDelete: "cascade" }),
+      .references(() => captures.id, { onDelete: "cascade" }),
     generationId: uuid("generation_id")
       .notNull()
-      .references(() => generation.id, { onDelete: "restrict" }),
+      .references(() => generations.id, { onDelete: "restrict" }),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -109,36 +107,35 @@ export const approval = pgTable(
     approvedAt: timestamp("approved_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex("approval_user_capture_idx").on(table.userId, table.captureId),
-    index("approval_user_approved_idx").on(table.userId, table.approvedAt),
+    uniqueIndex("approvals_user_capture_idx").on(table.userId, table.captureId),
+    index("approvals_user_approved_idx").on(table.userId, table.approvedAt),
   ],
 );
 
-export const miningSession = pgTable(
-  "mining_session",
+export const miningSessions = pgTable(
+  "mining_sessions",
   {
     id: uuid("id").primaryKey(),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    completedAt: timestamp("completed_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index("mining_session_user_created_idx").on(table.userId, table.createdAt)],
+  (table) => [index("mining_sessions_user_created_idx").on(table.userId, table.createdAt)],
 );
 
-export const miningSessionItem = pgTable(
-  "mining_session_item",
+export const miningSessionItems = pgTable(
+  "mining_session_items",
   {
     sessionId: uuid("session_id")
       .notNull()
-      .references(() => miningSession.id, { onDelete: "cascade" }),
+      .references(() => miningSessions.id, { onDelete: "cascade" }),
     captureId: uuid("capture_id")
       .notNull()
-      .references(() => capture.id, { onDelete: "cascade" }),
+      .references(() => captures.id, { onDelete: "cascade" }),
     position: integer("position").notNull(),
   },
   (table) => [primaryKey({ columns: [table.sessionId, table.captureId] })],
 );
 
-export const miningSchema = { approval, capture, generation, generationUsage, miningSession, miningSessionItem };
+export const miningSchema = { approvals, captures, generationUsages, generations, miningSessionItems, miningSessions };

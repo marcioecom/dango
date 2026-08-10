@@ -10,6 +10,8 @@ export class ApiError extends Error {
   }
 }
 
+export type CaptureDecisionAction = "defer" | "discard" | "restore" | "undo_approval";
+
 export async function listCaptures() {
   return request<{ captures: Capture[] }>("/api/captures");
 }
@@ -44,7 +46,7 @@ export async function approveCapture(captureId: string, input: ApproveCaptureInp
 
 export async function decideCapture(
   captureId: string,
-  action: "defer" | "discard" | "restore" | "undo_approval",
+  action: CaptureDecisionAction,
 ) {
   return request<Capture>(`/api/captures/${captureId}/decision`, {
     body: JSON.stringify({ action }),

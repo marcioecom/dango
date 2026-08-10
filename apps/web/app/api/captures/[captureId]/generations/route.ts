@@ -3,9 +3,9 @@ import { z } from "zod";
 
 import { database } from "@/db/runtime";
 import { requireUser } from "@/modules/auth/server/auth-utils";
-import { MiningError, miningErrorResponse, parseJsonRequest } from "@/modules/mining/server/errors";
-import { generateCapture } from "@/modules/mining/server/generations";
-import { generateSentenceOptions } from "@/modules/mining/server/sentence-generator";
+import { generateCapture } from "@/modules/mining/server/generation/generations";
+import { generateSentenceOptions } from "@/modules/mining/server/generation/sentence-generator";
+import { MiningError, miningErrorResponse, parseJsonRequest } from "@/modules/mining/shared/server/errors";
 import { assertJsonMutation, preflight, withCors } from "@/server/cors";
 
 export async function POST(

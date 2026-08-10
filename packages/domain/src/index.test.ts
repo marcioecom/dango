@@ -6,6 +6,7 @@ describe("capture contracts", () => {
   it("normalizes empty optional fields without changing the captured text", () => {
     const capture = createCaptureSchema.parse({
       id: "f72e13df-b525-4f1d-a35d-8d9f2ad3ae63",
+      kind: "term",
       originalSentence: " ",
       source: " Netflix ",
       text: " get away with ",
@@ -13,17 +14,22 @@ describe("capture contracts", () => {
 
     expect(capture).toEqual({
       id: "f72e13df-b525-4f1d-a35d-8d9f2ad3ae63",
+      kind: "term",
       originalSentence: null,
       source: "Netflix",
       text: "get away with",
     });
   });
 
-  it("requires exactly five generated sentences", () => {
+  it("requires exactly five generated examples", () => {
     const result = generationOutputSchema.safeParse({
-      explanation: "Explicação",
-      sentences: ["One sentence."],
-      translation: "Tradução",
+      examples: Array.from({ length: 4 }, (_, index) => ({
+        sentenceEn: `Example ${index + 1} with target.`,
+        targetForm: "target",
+        translationPtBr: `Exemplo ${index + 1} com alvo.`,
+      })),
+      explanationPtBr: "Explicação",
+      translationsPtBr: [{ text: "alvo" }],
     });
 
     expect(result.success).toBe(false);

@@ -1,5 +1,5 @@
 {
-  "id": "9e072499-78a7-42c5-a430-29f65eced418",
+  "id": "537db843-50d2-4acb-b7b3-8cef43f1f538",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -404,8 +404,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.approval": {
-      "name": "approval",
+    "public.approvals": {
+      "name": "approvals",
       "schema": "",
       "columns": {
         "id": {
@@ -453,8 +453,8 @@
         }
       },
       "indexes": {
-        "approval_user_capture_idx": {
-          "name": "approval_user_capture_idx",
+        "approvals_user_capture_idx": {
+          "name": "approvals_user_capture_idx",
           "columns": [
             {
               "expression": "user_id",
@@ -474,8 +474,8 @@
           "method": "btree",
           "with": {}
         },
-        "approval_user_approved_idx": {
-          "name": "approval_user_approved_idx",
+        "approvals_user_approved_idx": {
+          "name": "approvals_user_approved_idx",
           "columns": [
             {
               "expression": "user_id",
@@ -497,10 +497,10 @@
         }
       },
       "foreignKeys": {
-        "approval_capture_id_capture_id_fk": {
-          "name": "approval_capture_id_capture_id_fk",
-          "tableFrom": "approval",
-          "tableTo": "capture",
+        "approvals_capture_id_captures_id_fk": {
+          "name": "approvals_capture_id_captures_id_fk",
+          "tableFrom": "approvals",
+          "tableTo": "captures",
           "columnsFrom": [
             "capture_id"
           ],
@@ -510,10 +510,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "approval_generation_id_generation_id_fk": {
-          "name": "approval_generation_id_generation_id_fk",
-          "tableFrom": "approval",
-          "tableTo": "generation",
+        "approvals_generation_id_generations_id_fk": {
+          "name": "approvals_generation_id_generations_id_fk",
+          "tableFrom": "approvals",
+          "tableTo": "generations",
           "columnsFrom": [
             "generation_id"
           ],
@@ -523,9 +523,9 @@
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
-        "approval_user_id_users_id_fk": {
-          "name": "approval_user_id_users_id_fk",
-          "tableFrom": "approval",
+        "approvals_user_id_users_id_fk": {
+          "name": "approvals_user_id_users_id_fk",
+          "tableFrom": "approvals",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -543,8 +543,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.capture": {
-      "name": "capture",
+    "public.captures": {
+      "name": "captures",
       "schema": "",
       "columns": {
         "id": {
@@ -613,8 +613,8 @@
         }
       },
       "indexes": {
-        "capture_user_status_updated_idx": {
-          "name": "capture_user_status_updated_idx",
+        "captures_user_status_updated_idx": {
+          "name": "captures_user_status_updated_idx",
           "columns": [
             {
               "expression": "user_id",
@@ -640,8 +640,8 @@
           "method": "btree",
           "with": {}
         },
-        "capture_user_normalized_text_idx": {
-          "name": "capture_user_normalized_text_idx",
+        "captures_user_normalized_text_idx": {
+          "name": "captures_user_normalized_text_idx",
           "columns": [
             {
               "expression": "user_id",
@@ -663,9 +663,9 @@
         }
       },
       "foreignKeys": {
-        "capture_user_id_users_id_fk": {
-          "name": "capture_user_id_users_id_fk",
-          "tableFrom": "capture",
+        "captures_user_id_users_id_fk": {
+          "name": "captures_user_id_users_id_fk",
+          "tableFrom": "captures",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -683,8 +683,132 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.generation": {
-      "name": "generation",
+    "public.generation_usages": {
+      "name": "generation_usages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "generation_id": {
+          "name": "generation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "outcome": {
+          "name": "outcome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "input_tokens": {
+          "name": "input_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "output_tokens": {
+          "name": "output_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reported_cost_usd": {
+          "name": "reported_cost_usd",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "latency_ms": {
+          "name": "latency_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "generation_usages_user_created_idx": {
+          "name": "generation_usages_user_created_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "generation_usages_generation_id_generations_id_fk": {
+          "name": "generation_usages_generation_id_generations_id_fk",
+          "tableFrom": "generation_usages",
+          "tableTo": "generations",
+          "columnsFrom": [
+            "generation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "generation_usages_user_id_users_id_fk": {
+          "name": "generation_usages_user_id_users_id_fk",
+          "tableFrom": "generation_usages",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.generations": {
+      "name": "generations",
       "schema": "",
       "columns": {
         "id": {
@@ -766,12 +890,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "lease_expires_at": {
-          "name": "lease_expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
         "completed_at": {
           "name": "completed_at",
           "type": "timestamp with time zone",
@@ -794,8 +912,8 @@
         }
       },
       "indexes": {
-        "generation_user_capture_created_idx": {
-          "name": "generation_user_capture_created_idx",
+        "generations_user_capture_created_idx": {
+          "name": "generations_user_capture_created_idx",
           "columns": [
             {
               "expression": "user_id",
@@ -823,10 +941,10 @@
         }
       },
       "foreignKeys": {
-        "generation_capture_id_capture_id_fk": {
-          "name": "generation_capture_id_capture_id_fk",
-          "tableFrom": "generation",
-          "tableTo": "capture",
+        "generations_capture_id_captures_id_fk": {
+          "name": "generations_capture_id_captures_id_fk",
+          "tableFrom": "generations",
+          "tableTo": "captures",
           "columnsFrom": [
             "capture_id"
           ],
@@ -836,9 +954,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "generation_user_id_users_id_fk": {
-          "name": "generation_user_id_users_id_fk",
-          "tableFrom": "generation",
+        "generations_user_id_users_id_fk": {
+          "name": "generations_user_id_users_id_fk",
+          "tableFrom": "generations",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -856,206 +974,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.generation_usage": {
-      "name": "generation_usage",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "generation_id": {
-          "name": "generation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "model": {
-          "name": "model",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "outcome": {
-          "name": "outcome",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "input_tokens": {
-          "name": "input_tokens",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "output_tokens": {
-          "name": "output_tokens",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reported_cost_usd": {
-          "name": "reported_cost_usd",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "latency_ms": {
-          "name": "latency_ms",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "generation_usage_user_created_idx": {
-          "name": "generation_usage_user_created_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "generation_usage_generation_id_generation_id_fk": {
-          "name": "generation_usage_generation_id_generation_id_fk",
-          "tableFrom": "generation_usage",
-          "tableTo": "generation",
-          "columnsFrom": [
-            "generation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "generation_usage_user_id_users_id_fk": {
-          "name": "generation_usage_user_id_users_id_fk",
-          "tableFrom": "generation_usage",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.mining_session": {
-      "name": "mining_session",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "completed_at": {
-          "name": "completed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "mining_session_user_created_idx": {
-          "name": "mining_session_user_created_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "mining_session_user_id_users_id_fk": {
-          "name": "mining_session_user_id_users_id_fk",
-          "tableFrom": "mining_session",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.mining_session_item": {
-      "name": "mining_session_item",
+    "public.mining_session_items": {
+      "name": "mining_session_items",
       "schema": "",
       "columns": {
         "session_id": {
@@ -1079,10 +999,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "mining_session_item_session_id_mining_session_id_fk": {
-          "name": "mining_session_item_session_id_mining_session_id_fk",
-          "tableFrom": "mining_session_item",
-          "tableTo": "mining_session",
+        "mining_session_items_session_id_mining_sessions_id_fk": {
+          "name": "mining_session_items_session_id_mining_sessions_id_fk",
+          "tableFrom": "mining_session_items",
+          "tableTo": "mining_sessions",
           "columnsFrom": [
             "session_id"
           ],
@@ -1092,10 +1012,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "mining_session_item_capture_id_capture_id_fk": {
-          "name": "mining_session_item_capture_id_capture_id_fk",
-          "tableFrom": "mining_session_item",
-          "tableTo": "capture",
+        "mining_session_items_capture_id_captures_id_fk": {
+          "name": "mining_session_items_capture_id_captures_id_fk",
+          "tableFrom": "mining_session_items",
+          "tableTo": "captures",
           "columnsFrom": [
             "capture_id"
           ],
@@ -1107,14 +1027,82 @@
         }
       },
       "compositePrimaryKeys": {
-        "mining_session_item_session_id_capture_id_pk": {
-          "name": "mining_session_item_session_id_capture_id_pk",
+        "mining_session_items_session_id_capture_id_pk": {
+          "name": "mining_session_items_session_id_capture_id_pk",
           "columns": [
             "session_id",
             "capture_id"
           ]
         }
       },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.mining_sessions": {
+      "name": "mining_sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "mining_sessions_user_created_idx": {
+          "name": "mining_sessions_user_created_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mining_sessions_user_id_users_id_fk": {
+          "name": "mining_sessions_user_id_users_id_fk",
+          "tableFrom": "mining_sessions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},

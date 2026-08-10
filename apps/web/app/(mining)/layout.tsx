@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { AccountActions } from "@/modules/auth/ui/components/account-actions";
 import { requireAuth } from "@/modules/auth/server/auth-utils";
 import { LanguageSwitcher } from "@/modules/auth/ui/components/language-switcher";
-import { AppNavigation } from "@/modules/mining/ui/components/app-navigation";
+import { AppNavigation } from "@/modules/shell/ui/components/app-navigation";
 
 export default async function MiningLayout({ children }: { children: ReactNode }) {
   const session = await requireAuth();

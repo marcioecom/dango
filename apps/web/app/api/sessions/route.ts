@@ -2,8 +2,8 @@ import { createMiningSessionSchema } from "@dango/domain";
 
 import { database } from "@/db/runtime";
 import { requireUser } from "@/modules/auth/server/auth-utils";
-import { MiningError, miningErrorResponse, parseJsonRequest } from "@/modules/mining/server/errors";
-import { createMiningSession } from "@/modules/mining/server/sessions";
+import { createMiningSession } from "@/modules/mining/server/session/sessions";
+import { MiningError, miningErrorResponse, parseJsonRequest } from "@/modules/mining/shared/server/errors";
 import { assertJsonMutation, preflight, withCors } from "@/server/cors";
 
 export async function POST(request: Request) {

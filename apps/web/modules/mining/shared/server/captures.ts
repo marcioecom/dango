@@ -2,7 +2,7 @@ import type { ApprovalSource, Capture, CreateCaptureInput } from "@dango/domain"
 import { and, desc, eq, inArray } from "drizzle-orm";
 
 import type { Database } from "@/db";
-import { approval, capture, generation } from "@/db/schema/mining";
+import { approvals, captures, generations } from "@/db/schema/mining";
 import { MiningError } from "./errors";
 
 export function normalizeCaptureText(value: string) {
@@ -11,22 +11,22 @@ export function normalizeCaptureText(value: string) {
 
 export async function createCapture(database: Database, userId: string, input: CreateCaptureInput) {
   await database
-    .insert(capture)
+    .insert(captures)
     .values({
       id: input.id,
       normalizedText: normalizeCaptureText(input.text),
-       kind: input.kind,
-       originalSentence: input.kind === "term" ? input.originalSentence ?? null : null,
+      kind: input.kind,
+      originalSentence: input.kind === "term" ? input.originalSentence ?? null : null,
       source: input.source ?? null,
       text: input.text,
       userId,
     })
-    .onConflictDoNothing({ target: capture.id });
+    .onConflictDoNothing({ target: captures.id });
 
   const [saved] = await database
     .select()
-    .from(capture)
-    .where(and(eq(capture.id, input.id), eq(capture.userId, userId)));
+    .from(captures)
+    .where(and(eq(captures.id, input.id), eq(captures.userId, userId)));
 
   if (!saved) {
     throw new MiningError("CAPTURE_ID_CONFLICT", "Não foi possível usar o identificador da captura.", 409);
@@ -49,38 +49,38 @@ export async function createCapture(database: Database, userId: string, input: C
 }
 
 export async function listCaptures(database: Database, userId: string): Promise<Capture[]> {
-  const captures = await database
+  const rows = await database
     .select()
-    .from(capture)
-    .where(eq(capture.userId, userId))
-    .orderBy(desc(capture.updatedAt));
+    .from(captures)
+    .where(eq(captures.userId, userId))
+    .orderBy(desc(captures.updatedAt));
 
-  if (captures.length === 0) {
+  if (rows.length === 0) {
     return [];
   }
 
-  const captureIds = captures.map((item) => item.id);
-  const [generations, approvals] = await Promise.all([
+  const captureIds = rows.map((item) => item.id);
+  const [generationRows, approvalRows] = await Promise.all([
     database
       .select()
-      .from(generation)
-      .where(and(eq(generation.userId, userId), inArray(generation.captureId, captureIds)))
-      .orderBy(desc(generation.createdAt)),
+      .from(generations)
+      .where(and(eq(generations.userId, userId), inArray(generations.captureId, captureIds)))
+      .orderBy(desc(generations.createdAt)),
     database
       .select()
-      .from(approval)
-      .where(and(eq(approval.userId, userId), inArray(approval.captureId, captureIds))),
+      .from(approvals)
+      .where(and(eq(approvals.userId, userId), inArray(approvals.captureId, captureIds))),
   ]);
 
-  const latestGeneration = new Map<string, (typeof generations)[number]>();
-  for (const item of generations) {
+  const latestGeneration = new Map<string, (typeof generationRows)[number]>();
+  for (const item of generationRows) {
     if (!latestGeneration.has(item.captureId)) {
       latestGeneration.set(item.captureId, item);
     }
   }
-  const approvalByCapture = new Map(approvals.map((item) => [item.captureId, item]));
+  const approvalByCapture = new Map(approvalRows.map((item) => [item.captureId, item]));
 
-  return captures.map((item) =>
+  return rows.map((item) =>
     serializeCapture(
       item,
       latestGeneration.get(item.id) ?? null,
@@ -90,17 +90,17 @@ export async function listCaptures(database: Database, userId: string): Promise<
 }
 
 export async function getCapture(database: Database, userId: string, captureId: string) {
-  const captures = await listCaptures(database, userId);
-  const found = captures.find((item) => item.id === captureId);
+  const all = await listCaptures(database, userId);
+  const found = all.find((item) => item.id === captureId);
   if (!found) {
     throw new MiningError("CAPTURE_NOT_FOUND", "Captura não encontrada.", 404);
   }
   return found;
 }
 
-type CaptureRow = typeof capture.$inferSelect;
-type GenerationRow = typeof generation.$inferSelect;
-type ApprovalRow = typeof approval.$inferSelect;
+type CaptureRow = typeof captures.$inferSelect;
+type GenerationRow = typeof generations.$inferSelect;
+type ApprovalRow = typeof approvals.$inferSelect;
 
 function serializeCapture(
   item: CaptureRow,

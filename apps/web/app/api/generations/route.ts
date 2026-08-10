@@ -2,9 +2,9 @@ import { z } from "zod";
 
 import { database } from "@/db/runtime";
 import { requireUser } from "@/modules/auth/server/auth-utils";
-import { MiningError, miningErrorResponse, parseJsonRequest } from "@/modules/mining/server/errors";
-import { generateCaptures } from "@/modules/mining/server/generations";
-import { generateSentenceOptions } from "@/modules/mining/server/sentence-generator";
+import { generateCaptures } from "@/modules/mining/server/generation/generations";
+import { generateSentenceOptions } from "@/modules/mining/server/generation/sentence-generator";
+import { MiningError, miningErrorResponse, parseJsonRequest } from "@/modules/mining/shared/server/errors";
 import { assertJsonMutation, preflight, withCors } from "@/server/cors";
 
 const batchSchema = z.object({ captureIds: z.array(z.uuid()).min(1), id: z.uuid() });

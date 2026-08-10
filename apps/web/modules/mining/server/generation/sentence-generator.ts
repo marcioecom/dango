@@ -1,14 +1,16 @@
+import { gateway, type GatewayProviderOptions } from "@ai-sdk/gateway";
 import {
   generationBatchOutputSchema,
   sentenceContainsTarget,
   type GenerationOutput,
 } from "@dango/domain";
-import { gateway } from "@ai-sdk/gateway";
 import { generateText, Output } from "ai";
 
 export const PROMPT_VERSION = "sentence-mining-v1";
 export const DEFAULT_MODEL = "openai/gpt-5-mini";
 export const FALLBACK_MODEL = "google/gemini-2.5-flash";
+
+const EXAMPLE_COUNT = 5;
 
 export type GenerationUsage = {
   inputTokens: number | null;
@@ -25,15 +27,19 @@ export type SentenceGenerator = (input: {
     source: string | null;
     text: string;
   }>;
-  model: string;
   timeoutMs: number;
-}) => Promise<{ outputs: Map<string, GenerationOutput>; usage: GenerationUsage }>;
+}) => Promise<{ model: string; outputs: Map<string, GenerationOutput>; usage: GenerationUsage }>;
+
+const gatewayOptions = {
+  models: [FALLBACK_MODEL],
+} satisfies GatewayProviderOptions;
 
 export const generateSentenceOptions: SentenceGenerator = async (input) => {
   const startedAt = performance.now();
   const result = await generateText({
-    model: gateway(input.model),
+    model: gateway(DEFAULT_MODEL),
     output: Output.object({ schema: generationBatchOutputSchema }),
+    providerOptions: { gateway: gatewayOptions },
     system: [
       "You create natural English sentence-mining material for a Brazilian Portuguese learner.",
       "Choose one meaning for the target: the meaning established by the original sentence, or its most common meaning when no context is supplied.",
@@ -48,8 +54,7 @@ export const generateSentenceOptions: SentenceGenerator = async (input) => {
     prompt: JSON.stringify({
       captures: input.captures.map((capture) => ({
         ...capture,
-        exampleCount:
-          capture.originalSentence && sentenceContainsTarget(capture.originalSentence, capture.text) ? 4 : 5,
+        exampleCount: EXAMPLE_COUNT,
       })),
     }),
     timeout: input.timeoutMs,
@@ -59,13 +64,8 @@ export const generateSentenceOptions: SentenceGenerator = async (input) => {
   for (const item of result.output.items) {
     if (outputs.has(item.captureId)) throw new Error("The generated output contains a duplicate capture.");
     const capture = input.captures.find((candidate) => candidate.id === item.captureId);
-    const exampleCount =
-      capture?.kind === "sentence" ||
-      (capture?.originalSentence && sentenceContainsTarget(capture.originalSentence, capture.text))
-        ? 4
-        : 5;
-    if (item.examples.length < exampleCount) {
-      throw new Error("The generated output does not contain enough examples.");
+    if (item.examples.length !== EXAMPLE_COUNT) {
+      throw new Error("The generated output must contain exactly five examples.");
     }
     if (capture?.kind === "sentence" && !item.sentenceTranslationPtBr) {
       throw new Error("The generated output does not translate the captured sentence.");
@@ -75,8 +75,8 @@ export const generateSentenceOptions: SentenceGenerator = async (input) => {
         throw new Error("The generated target form is not present in its example.");
       }
     }
-    const { captureId, examples, ...output } = item;
-    outputs.set(captureId, { ...output, examples: examples.slice(0, exampleCount) });
+    const { captureId, ...output } = item;
+    outputs.set(captureId, output);
   }
   if (outputs.size !== input.captures.length || input.captures.some((capture) => !outputs.has(capture.id))) {
     throw new Error("The generated output does not match the requested captures.");
@@ -94,6 +94,7 @@ export const generateSentenceOptions: SentenceGenerator = async (input) => {
   }
 
   return {
+    model: result.response.modelId,
     outputs,
     usage: {
       inputTokens: result.usage.inputTokens ?? null,

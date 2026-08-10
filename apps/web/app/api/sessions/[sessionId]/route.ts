@@ -2,8 +2,8 @@ import { z } from "zod";
 
 import { database } from "@/db/runtime";
 import { requireUser } from "@/modules/auth/server/auth-utils";
-import { MiningError, miningErrorResponse } from "@/modules/mining/server/errors";
-import { getMiningSession } from "@/modules/mining/server/sessions";
+import { getMiningSession } from "@/modules/mining/server/session/sessions";
+import { MiningError, miningErrorResponse } from "@/modules/mining/shared/server/errors";
 import { preflight, withCors } from "@/server/cors";
 
 export async function GET(request: Request, context: { params: Promise<{ sessionId: string }> }) {

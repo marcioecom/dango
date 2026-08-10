@@ -2,8 +2,8 @@ import { createCaptureSchema } from "@dango/domain";
 
 import { database } from "@/db/runtime";
 import { requireUser } from "@/modules/auth/server/auth-utils";
-import { createCapture, listCaptures } from "@/modules/mining/server/captures";
-import { MiningError, miningErrorResponse, parseJsonRequest } from "@/modules/mining/server/errors";
+import { createCapture, listCaptures } from "@/modules/mining/shared/server/captures";
+import { MiningError, miningErrorResponse, parseJsonRequest } from "@/modules/mining/shared/server/errors";
 import { assertJsonMutation, preflight, withCors } from "@/server/cors";
 
 export async function GET(request: Request) {
