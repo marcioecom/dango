@@ -1,13 +1,12 @@
 import { and, eq } from "drizzle-orm";
 
-import type { Database } from "@/db";
+import { database } from "@/db/runtime";
 import { approvals, captures } from "@/db/schema/mining";
 
 import { getCapture } from "@/modules/mining/shared/server/captures";
 import { MiningError } from "@/modules/mining/shared/server/errors";
 
 export async function decideCapture(
-  database: Database,
   userId: string,
   captureId: string,
   action: "defer" | "discard" | "restore" | "undo_approval",
@@ -44,5 +43,5 @@ export async function decideCapture(
       .where(and(eq(captures.id, captureId), eq(captures.userId, userId)));
   });
 
-  return getCapture(database, userId, captureId);
+  return getCapture(userId, captureId);
 }

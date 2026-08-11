@@ -7,5 +7,6 @@ export type ReviewOption = {
   key: string;
   sentence: string;
   source: Extract<ApprovalSource, "generated" | "original">;
+  targetForm: string;
   translation: string | null;
 };

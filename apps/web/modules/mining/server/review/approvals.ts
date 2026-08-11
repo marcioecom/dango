@@ -1,13 +1,12 @@
 import { sentenceContainsTarget, type ApproveCaptureInput } from "@dango/domain";
 import { and, eq } from "drizzle-orm";
 
-import type { Database } from "@/db";
+import { database } from "@/db/runtime";
 import { approvals, captures, generations } from "@/db/schema/mining";
 import { getCapture } from "@/modules/mining/shared/server/captures";
 import { MiningError } from "@/modules/mining/shared/server/errors";
 
 export async function approveCapture(
-  database: Database,
   userId: string,
   captureId: string,
   input: ApproveCaptureInput,
@@ -26,7 +25,10 @@ export async function approveCapture(
       .from(approvals)
       .where(and(eq(approvals.captureId, captureId), eq(approvals.userId, userId)));
     if (existingApproval) {
-      if (captureRow.status === "approved" && isSameApproval(existingApproval, input)) {
+      if (
+        ["approved", "pending_anki", "sent_to_anki"].includes(captureRow.status) &&
+        isSameApproval(existingApproval, input)
+      ) {
         return;
       }
       throw new MiningError("APPROVAL_CONFLICT", "Esta captura já possui outra aprovação.", 409);
@@ -59,6 +61,7 @@ export async function approveCapture(
         id: input.id,
         sentence: input.sentence,
         source: input.source,
+        targetForm: input.targetForm,
         userId,
       })
       .onConflictDoNothing();
@@ -77,7 +80,7 @@ export async function approveCapture(
       .where(and(eq(captures.id, captureId), eq(captures.userId, userId)));
   });
 
-  return getCapture(database, userId, captureId);
+  return getCapture(userId, captureId);
 }
 
 function isSameApproval(saved: typeof approvals.$inferSelect, input: ApproveCaptureInput) {
@@ -85,7 +88,8 @@ function isSameApproval(saved: typeof approvals.$inferSelect, input: ApproveCapt
     saved.id === input.id &&
     saved.generationId === input.generationId &&
     saved.sentence === input.sentence &&
-    saved.source === input.source
+    saved.source === input.source &&
+    saved.targetForm === input.targetForm
   );
 }
 
@@ -94,14 +98,36 @@ function validateSelection(
   generationRow: typeof generations.$inferSelect,
   input: ApproveCaptureInput,
 ) {
-  if (input.source === "generated" && !generationRow.examples?.some((example) => example.sentenceEn === input.sentence)) {
+  const knownTargetForms = new Set([
+    captureRow.text,
+    ...(generationRow.examples ?? []).map((example) => example.targetForm),
+  ]);
+  if (!knownTargetForms.has(input.targetForm)) {
+    throw new MiningError(
+      "INVALID_TARGET_FORM",
+      "Escolha a forma da expressão usada na opção original.",
+      400,
+    );
+  }
+  if (!sentenceContainsTarget(input.sentence, input.targetForm)) {
+    throw new MiningError("INVALID_TARGET_FORM", "A frase final deve conter a expressão escolhida.", 400);
+  }
+
+  if (
+    input.source === "generated" &&
+    !generationRow.examples?.some(
+      (example) => example.sentenceEn === input.sentence && example.targetForm === input.targetForm,
+    )
+  ) {
     throw new MiningError("INVALID_SELECTION", "Escolha uma das frases geradas.", 400);
   }
 
   const originalSentence = captureRow.kind === "sentence" ? captureRow.text : captureRow.originalSentence;
   if (
     input.source === "original" &&
-    (originalSentence !== input.sentence || !sentenceContainsTarget(input.sentence, captureRow.text))
+    (originalSentence !== input.sentence ||
+      input.targetForm !== captureRow.text ||
+      !sentenceContainsTarget(input.sentence, captureRow.text))
   ) {
     throw new MiningError("INVALID_ORIGINAL", "A frase original não contém a expressão capturada.", 400);
   }

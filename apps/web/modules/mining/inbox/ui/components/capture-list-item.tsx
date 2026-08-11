@@ -24,6 +24,8 @@ export function CaptureListItem({
   const decision = useCaptureDecision();
   const status = {
     approved: t("readyForAnki"),
+    pending_anki: t("statusPendingAnki"),
+    sent_to_anki: t("statusSentToAnki"),
     generating: t("statusGenerating"),
     inbox: t("statusInbox"),
     ready_for_review: t("statusReady"),

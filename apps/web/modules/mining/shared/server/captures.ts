@@ -1,7 +1,7 @@
 import type { ApprovalSource, Capture, CreateCaptureInput } from "@dango/domain";
 import { and, desc, eq, inArray } from "drizzle-orm";
 
-import type { Database } from "@/db";
+import { database } from "@/db/runtime";
 import { approvals, captures, generations } from "@/db/schema/mining";
 import { MiningError } from "./errors";
 
@@ -9,7 +9,7 @@ export function normalizeCaptureText(value: string) {
   return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
 }
 
-export async function createCapture(database: Database, userId: string, input: CreateCaptureInput) {
+export async function createCapture(userId: string, input: CreateCaptureInput) {
   await database
     .insert(captures)
     .values({
@@ -45,10 +45,10 @@ export async function createCapture(database: Database, userId: string, input: C
     );
   }
 
-  return getCapture(database, userId, saved.id);
+  return getCapture(userId, saved.id);
 }
 
-export async function listCaptures(database: Database, userId: string): Promise<Capture[]> {
+export async function listCaptures(userId: string): Promise<Capture[]> {
   const rows = await database
     .select()
     .from(captures)
@@ -89,8 +89,8 @@ export async function listCaptures(database: Database, userId: string): Promise<
   );
 }
 
-export async function getCapture(database: Database, userId: string, captureId: string) {
-  const all = await listCaptures(database, userId);
+export async function getCapture(userId: string, captureId: string) {
+  const all = await listCaptures(userId);
   const found = all.find((item) => item.id === captureId);
   if (!found) {
     throw new MiningError("CAPTURE_NOT_FOUND", "Captura não encontrada.", 404);
@@ -115,6 +115,7 @@ function serializeCapture(
           id: approved.id,
           sentence: approved.sentence,
           source: approved.source as ApprovalSource,
+          targetForm: approved.targetForm,
         }
       : null,
     createdAt: item.createdAt.toISOString(),
