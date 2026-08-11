@@ -6,7 +6,7 @@ Baseline specification approved from the migration planning conversation. Implem
 
 ## Scope
 
-Dango is a new project replacing the daily workflow of the Python `anki-automator` CLI. The first usable delivery is an installable iPhone PWA plus a shared backend for online capture, AI generation, review, and approval. The macOS desktop follows as the device-local bridge for audio generation and Anki delivery.
+Dango is a new project replacing the daily workflow of the Python `anki-automator` CLI. The first usable delivery is an installable iPhone PWA plus a shared backend for online capture, AI generation, review, and approval. The macOS desktop follows as the device-local bridge that generates audio locally and delivers cards to Anki.
 
 The existing Python repository remains unchanged as reference and fallback. This repository does not need to preserve its internal architecture or file formats beyond the explicit pending-item import.
 
@@ -25,6 +25,8 @@ Tauri desktop
   |                 |-- Better Auth
   |                 |-- Postgres
   |                 `-- Vercel AI Gateway
+  |
+  |-- HTTPS --> Google Translate text-to-speech
   |
   `-- local Rust commands --> AnkiConnect at 127.0.0.1:8765
 
@@ -129,8 +131,8 @@ Generation attempts and Anki deliveries are separate records from the capture. A
 ### Text-to-speech
 
 - `TTS-01`: The provider is selected after a measured comparison with the current gTTS output.
-- `TTS-02`: The user can preview the same audio that will be attached to the card.
-- `TTS-03`: Audio is transient in the backend and is not retained as cloud history.
+- `TTS-02`: The desktop generates the English MP3 locally and attaches it automatically without requiring a preview step.
+- `TTS-03`: Audio is never sent through the backend and remains in durable device-local storage only until Anki confirms the delivery.
 - `TTS-04`: Failed audio generation can be retried without repeating sentence review.
 - `TTS-05`: AwesomeTTS is not required.
 
@@ -170,7 +172,7 @@ Generation attempts and Anki deliveries are separate records from the capture. A
 
 ## Data ownership
 
-Cloud history retains captures, generations, selected sentences, decisions, and synchronization state per user. It does not permanently retain generated MP3 files.
+Cloud history retains captures, generations, selected sentences, decisions, and synchronization state per user. Generated MP3 files never transit or persist in the cloud.
 
 Anki configuration, Anki note identifiers, audio files awaiting delivery, and the Anki outbox are device-local. A stable capture tag provides delivery idempotency if local confirmation is interrupted.
 
@@ -231,5 +233,5 @@ Model comparison measures structured-output validity, naturalness, correct targe
 ## Open inputs
 
 - The default AI model is `openai/gpt-5-mini`, with `google/gemini-2.5-flash` as fallback, selected from the measured LEA-30 benchmark.
-- The initial TTS provider is gTTS, selected from the measured LEA-29 audio comparison. On provider failure, preserve the approved review decision and retry gTTS; no cross-provider backend fallback is selected for the private beta because edge-tts returned HTTP 403 and macOS `say` is device-local.
+- The initial TTS provider is gTTS, selected from the measured LEA-29 audio comparison and called by the native desktop layer. On provider failure, preserve the approved review decision and local delivery, then retry gTTS. No cross-provider fallback is selected for the private beta because edge-tts returned HTTP 403 and macOS `say` was not selected.
 - Daily generation limit and default daily goal remain intentionally unset until measured or chosen by the user.

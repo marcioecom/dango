@@ -6,7 +6,7 @@ product
 
 ## Purpose
 
-Dango helps English learners turn words, expressions, and original sentences found during immersion into reviewed Anki cards with minimal repetitive work. It combines fast capture, AI-assisted sentence generation, text-to-speech audio, and reliable delivery to a local Anki installation.
+Dango helps English learners turn words, expressions, and original sentences found during immersion into reviewed Anki cards with minimal repetitive work. It combines fast capture, AI-assisted sentence generation, desktop-generated text-to-speech audio, and reliable delivery to a local Anki installation.
 
 The product also supports a consistent mining routine through small daily goals, resumable sessions, and reminders that only appear when work is pending.
 
@@ -32,7 +32,7 @@ There are no shared queues or shared progress.
 4. Review the original sentence and generated alternatives.
 5. Select or edit one sentence and explicitly approve it.
 6. Synchronize the approved capture to the desktop.
-7. Generate and preview its English audio on the desktop.
+7. Generate its English audio locally on the desktop.
 8. Deliver the card to the user's local Anki through AnkiConnect.
 9. Retry safely if Anki is closed or unavailable.
 

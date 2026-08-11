@@ -13,6 +13,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@dango/domain": "workspace:*",
     "@dango/i18n": "workspace:*",
     "@dango/ui": "workspace:*",
     "@hookform/resolvers": "^5.7.1",
