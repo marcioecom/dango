@@ -3,10 +3,10 @@
 import type { Capture } from "@dango/domain";
 import { useQuery } from "@tanstack/react-query";
 
-import { getMiningSession } from "../../shared/hooks/api";
-import { capturesQuery } from "../../shared/hooks/queries";
-import { miningQueryKeys } from "../../shared/hooks/query-keys";
-import { useCaptureDecision } from "../../shared/hooks/use-capture-decision";
+import { getMiningSession } from "@/modules/mining/shared/hooks/api";
+import { capturesQuery } from "@/modules/mining/shared/hooks/queries";
+import { miningQueryKeys } from "@/modules/mining/shared/hooks/query-keys";
+import { useCaptureDecision } from "@/modules/mining/shared/hooks/use-capture-decision";
 
 export function useMiningSession(sessionId: string) {
   const session = useQuery({

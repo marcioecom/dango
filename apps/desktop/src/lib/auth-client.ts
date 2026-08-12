@@ -8,6 +8,10 @@ export function setAuthToken(token: string | null) {
   bearerToken = token;
 }
 
+export function getAuthToken() {
+  return bearerToken;
+}
+
 export const authClient = createAuthClient({
   baseURL: authBaseUrl,
   fetchOptions: {

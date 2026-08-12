@@ -8,12 +8,16 @@ export class MiningError extends Error {
   }
 }
 
+// TODO: remove any string in portuguese
 export function miningErrorResponse(error: unknown) {
   if (error instanceof Response) {
     return error;
   }
   if (error instanceof MiningError) {
-    return Response.json({ code: error.code, error: error.message }, { status: error.status });
+    return Response.json(
+      { code: error.code, error: error.message },
+      { status: error.status },
+    );
   }
 
   console.error("Falha inesperada na mineração", error);
@@ -27,6 +31,10 @@ export async function parseJsonRequest(request: Request) {
   try {
     return await request.json();
   } catch {
-    throw new MiningError("INVALID_JSON", "O corpo da requisição deve ser um JSON válido.", 400);
+    throw new MiningError(
+      "INVALID_JSON",
+      "O corpo da requisição deve ser um JSON válido.",
+      400,
+    );
   }
 }

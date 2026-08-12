@@ -1,24 +1,39 @@
 import { captureDecisionSchema } from "@dango/domain";
 import { z } from "zod";
 
-import { database } from "@/db/runtime";
-import { requireUser } from "@/modules/auth/server/auth-utils";
 import { decideCapture } from "@/modules/mining/server/review/decisions";
-import { MiningError, miningErrorResponse, parseJsonRequest } from "@/modules/mining/shared/server/errors";
-import { assertJsonMutation, preflight, withCors } from "@/server/cors";
+import {
+  MiningError,
+  parseJsonRequest,
+} from "@/modules/mining/shared/server/errors";
+import { withJsonAuth } from "@/server/auth";
+import { preflight } from "@/server/cors";
 
-export async function POST(request: Request, context: { params: Promise<{ captureId: string }> }) {
-  try {
-    assertJsonMutation(request);
-    const user = await requireUser(request);
-    const parsed = captureDecisionSchema.safeParse(await parseJsonRequest(request));
-    if (!parsed.success) throw new MiningError("INVALID_DECISION", "Escolha uma decisão válida.", 400);
-    const { captureId } = await context.params;
-    if (!z.uuid().safeParse(captureId).success) throw new MiningError("INVALID_CAPTURE_ID", "Identificador de captura inválido.", 400);
-    return withCors(request, Response.json(await decideCapture(database, user.id, captureId, parsed.data.action)));
-  } catch (error) {
-    return withCors(request, miningErrorResponse(error));
+export const POST = withJsonAuth(async (request, { params, user }) => {
+  const parsed = captureDecisionSchema.safeParse(
+    await parseJsonRequest(request),
+  );
+
+  if (!parsed.success)
+    throw new MiningError(
+      "INVALID_DECISION",
+      "Escolha uma decisão válida.",
+      400,
+    );
+
+  const { captureId } = await params;
+
+  if (!z.uuid().safeParse(captureId).success) {
+    throw new MiningError(
+      "INVALID_CAPTURE_ID",
+      "Identificador de captura inválido.",
+      400,
+    );
   }
-}
+
+  const capture = await decideCapture(user.id, captureId, parsed.data.action);
+
+  return Response.json(capture);
+});
 
 export const OPTIONS = preflight;

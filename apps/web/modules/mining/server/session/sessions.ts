@@ -1,21 +1,20 @@
 import type { MiningSession } from "@dango/domain";
 import { and, asc, eq, inArray } from "drizzle-orm";
 
-import type { Database } from "@/db";
+import { database } from "@/db/runtime";
 import { captures, miningSessionItems, miningSessions } from "@/db/schema/mining";
 
-import { MiningError } from "../../shared/server/errors";
+import { MiningError } from "@/modules/mining/shared/server/errors";
 
 export async function createMiningSession(
-  database: Database,
   userId: string,
   input: { captureIds: string[]; id: string },
 ): Promise<MiningSession> {
-  const existing = await database
+  const [existing] = await database
     .select()
     .from(miningSessions)
     .where(and(eq(miningSessions.id, input.id), eq(miningSessions.userId, userId)));
-  if (existing[0]) return getMiningSession(database, userId, input.id);
+  if (existing) return getMiningSession(userId, input.id);
 
   const found = await database
     .select({ id: captures.id, status: captures.status })
@@ -32,10 +31,10 @@ export async function createMiningSession(
     );
   });
 
-  return getMiningSession(database, userId, input.id);
+  return getMiningSession(userId, input.id);
 }
 
-export async function getMiningSession(database: Database, userId: string, sessionId: string): Promise<MiningSession> {
+export async function getMiningSession(userId: string, sessionId: string): Promise<MiningSession> {
   const [session] = await database
     .select()
     .from(miningSessions)

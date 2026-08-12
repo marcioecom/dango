@@ -104,6 +104,7 @@ export const approvals = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     sentence: text("sentence").notNull(),
     source: text("source").notNull(),
+    targetForm: text("target_form"),
     approvedAt: timestamp("approved_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [

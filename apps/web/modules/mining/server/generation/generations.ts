@@ -2,11 +2,11 @@ import { randomUUID } from "node:crypto";
 
 import { and, eq, inArray } from "drizzle-orm";
 
-import type { Database } from "@/db";
-import { captures, generationUsages, generations } from "@/db/schema/mining";
+import { database } from "@/db/runtime";
+import { captures, generations, generationUsages } from "@/db/schema/mining";
 
-import { getCapture, listCaptures } from "../../shared/server/captures";
-import { MiningError } from "../../shared/server/errors";
+import { getCapture, listCaptures } from "@/modules/mining/shared/server/captures";
+import { MiningError } from "@/modules/mining/shared/server/errors";
 import {
   DEFAULT_MODEL,
   PROMPT_VERSION,
@@ -16,25 +16,23 @@ import {
 const generationTimeoutMs = 60_000;
 
 export async function generateCapture(
-  database: Database,
   userId: string,
   captureId: string,
   operationId: string,
   generator: SentenceGenerator,
 ) {
-  await generateCaptures(database, userId, [captureId], operationId, generator);
-  return getCapture(database, userId, captureId);
+  await generateCaptures(userId, [captureId], operationId, generator);
+  return getCapture(userId, captureId);
 }
 
 export async function generateCaptures(
-  database: Database,
   userId: string,
   captureIds: string[],
   operationId: string,
   generator: SentenceGenerator,
 ) {
-  const reserved = await reserve(database, userId, captureIds, operationId);
-  if (!reserved) return listCaptures(database, userId);
+  const reserved = await reserve(userId, captureIds, operationId);
+  if (!reserved) return listCaptures(userId);
 
   try {
     const result = await generator({
@@ -80,7 +78,7 @@ export async function generateCaptures(
         .set({ status: "ready_for_review", updatedAt: completedAt })
         .where(and(eq(captures.userId, userId), inArray(captures.id, captureIds)));
     });
-    return listCaptures(database, userId);
+    return listCaptures(userId);
   } catch (error) {
     await database.transaction(async (transaction) => {
       await transaction
@@ -100,13 +98,13 @@ export async function generateCaptures(
   }
 }
 
-async function reserve(database: Database, userId: string, captureIds: string[], operationId: string) {
-  const existing = await database
+async function reserve(userId: string, captureIds: string[], operationId: string) {
+  const [existing] = await database
     .select({ captureId: generations.captureId, status: generations.status })
     .from(generations)
     .where(and(eq(generations.userId, userId), eq(generations.id, operationId)));
-  if (existing[0]) {
-    if (existing[0].status === "succeeded") return null;
+  if (existing) {
+    if (existing.status === "succeeded") return null;
     throw new MiningError("GENERATION_RUNNING", "A geração já está em andamento.", 409);
   }
 
@@ -115,7 +113,7 @@ async function reserve(database: Database, userId: string, captureIds: string[],
       .select()
       .from(captures)
       .where(and(eq(captures.userId, userId), inArray(captures.id, captureIds)));
-    if (found.length !== captureIds.length || found.some((item) => item.status === "approved" || item.status === "generating")) {
+    if (found.length !== captureIds.length || found.some((item) => item.status !== "inbox")) {
       throw new MiningError("INVALID_GENERATION_CAPTURES", "Escolha capturas que possam ser geradas.", 409);
     }
     const reserved = found.map((item, index) => ({ captureId: item.id, id: index === 0 ? operationId : randomUUID() }));

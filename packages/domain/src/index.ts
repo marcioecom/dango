@@ -5,6 +5,8 @@ export const captureStatusSchema = z.enum([
   "generating",
   "ready_for_review",
   "approved",
+  "pending_anki",
+  "sent_to_anki",
   "deferred",
   "discarded",
 ]);
@@ -67,6 +69,7 @@ export const approveCaptureSchema = z.object({
   id: z.uuid(),
   sentence: z.string().trim().min(1, "Escolha ou escreva uma frase."),
   source: approvalSourceSchema,
+  targetForm: z.string().trim().min(1),
 });
 
 export const captureDecisionSchema = z.object({
@@ -89,6 +92,7 @@ export const approvalSchema = z.object({
   id: z.uuid(),
   sentence: z.string(),
   source: approvalSourceSchema,
+  targetForm: z.string().nullable(),
 });
 
 export const captureSchema = z.object({
@@ -106,6 +110,38 @@ export const captureSchema = z.object({
 
 export const captureListSchema = z.object({ captures: z.array(captureSchema) });
 
+export const ankiRemoteStatusSchema = z.enum(["approved", "pending_anki"]);
+
+export const approvedCardSchema = z.object({
+  approvalId: z.uuid(),
+  approvedAt: z.string().datetime(),
+  captureId: z.uuid(),
+  remoteStatus: ankiRemoteStatusSchema,
+  sentence: z.string().trim().min(1),
+  targetForm: z.string().trim().min(1),
+  targetText: z.string().trim().min(1),
+  translationsPtBr: z.array(z.string().trim().min(1)).min(1),
+});
+
+export const approvedCardSyncIssueSchema = z.object({
+  approvalId: z.uuid(),
+  captureId: z.uuid(),
+  code: z.string().min(1),
+});
+
+export const approvedCardListSchema = z.object({
+  cards: z.array(approvedCardSchema),
+  issues: z.array(approvedCardSyncIssueSchema).default([]),
+});
+
+export const ankiDeliveryTransitionSchema = z.object({ approvalId: z.uuid() });
+
+export const ankiDeliveryReceiptSchema = z.object({
+  approvalId: z.uuid(),
+  captureId: z.uuid(),
+  status: z.enum(["pending_anki", "sent_to_anki"]),
+});
+
 export const miningSessionSchema = z.object({
   captureIds: z.array(z.uuid()).min(1),
   createdAt: z.string().datetime(),
@@ -119,7 +155,11 @@ export const createMiningSessionSchema = z.object({
 
 export type Approval = z.infer<typeof approvalSchema>;
 export type ApprovalSource = z.infer<typeof approvalSourceSchema>;
+export type AnkiDeliveryReceipt = z.infer<typeof ankiDeliveryReceiptSchema>;
+export type AnkiRemoteStatus = z.infer<typeof ankiRemoteStatusSchema>;
 export type ApproveCaptureInput = z.infer<typeof approveCaptureSchema>;
+export type ApprovedCard = z.infer<typeof approvedCardSchema>;
+export type ApprovedCardSyncIssue = z.infer<typeof approvedCardSyncIssueSchema>;
 export type Capture = z.infer<typeof captureSchema>;
 export type CaptureStatus = z.infer<typeof captureStatusSchema>;
 export type CreateCaptureInput = z.infer<typeof createCaptureSchema>;

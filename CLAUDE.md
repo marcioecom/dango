@@ -26,6 +26,43 @@ Read these sources before changing code, in this order:
 - Use React Query for remote server state, React Hook Form with Zod for forms, and the Better Auth `authClient` for Better Auth endpoints.
 - Keep custom HTTP and WebSocket transport adapters separate from feature hooks for routes not owned by Better Auth.
 
+## Feature module convention (apps/web)
+
+Each feature lives in `apps/web/modules/<feature>/` and is the only place that feature's code may live. Reference example: `modules/mining/`.
+
+**Layers inside a module** (each exists only when needed):
+
+- `ui/views/<name>-view.tsx`: composition roots for pages. The only UI files allowed to call data hooks. Pages under `app/` stay thin: session guard plus rendering a view.
+- `ui/components/<name>.tsx`: presentational components. No fetching, mutations, or form state; receive data and callbacks via props.
+- `hooks/`: all client logic - React Query hooks, form hooks (React Hook Form + Zod), and the HTTP transport adapter (`api.ts`). Query keys are centralized in `query-keys.ts` with hierarchical keys.
+- `server/`: backend use cases called by API routes (Drizzle transactions, idempotency checks). API routes under `app/api/` stay thin and only call these use cases.
+- `types.ts`: UI-level types shared across the feature's files. Do not export shared types from inside hooks.
+
+**Sub-features**: when a module grows to cover several distinct flows, split it into sub-feature folders that mirror the same layered structure, plus a `shared/` folder for what 2+ sub-features use:
+
+```
+modules/<feature>/
+├── shared/
+│   ├── hooks/          # transport adapter, query keys, cross-feature hooks
+│   └── server/         # shared use cases and error helpers
+├── <sub-feature>/
+│   ├── hooks/
+│   ├── types.ts        # only when needed
+│   └── ui/{components,views}
+└── server/
+    └── <sub-feature>/  # use cases grouped by sub-feature
+```
+
+**Cross-feature imports**: a sub-feature may import from another sub-feature's public layer (views, hooks, types) when one flow genuinely builds on another (example: `mining/session` renders `mining/review`'s view). Never reach into `ui/components` of another sub-feature; compose at the view level or move the piece to `shared/`.
+
+**Style rules**:
+
+- kebab-case file names; hooks `use-<name>.ts`; views `<name>-view.tsx`.
+- Named exports only; component name matches the file name.
+- No barrel files (`index.ts`). Import files directly.
+- Relative imports inside a module; the `@/` alias from `app/` routes and between modules.
+- App-wide shell pieces (navigation, providers) live in `modules/shell/`, not inside a feature module.
+
 ## Repository state
 
 This repository currently contains an empty scaffold. Create each application or shared package when the first assigned vertical slice requires it. Empty package directories communicate the intended boundaries, not a requirement to fill every package immediately.

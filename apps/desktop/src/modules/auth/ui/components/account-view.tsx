@@ -1,6 +1,7 @@
 import { Button } from "@dango/ui/components/button";
 import { useTranslation } from "react-i18next";
 
+import { AnkiDeliveryView } from "../../../anki/ui/anki-delivery-view";
 import { ReminderView } from "../../../reminder/ui/reminder-view";
 import { useLogout } from "../../hooks/use-logout";
 import { errorKey } from "../../session";
@@ -11,7 +12,7 @@ export function AccountView({ user }: { user: AuthenticatedUser }) {
   const logoutMutation = useLogout();
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-3xl">
       <p className="mb-3 text-sm font-semibold text-primary">
         {t("account.status")}
       </p>
@@ -33,6 +34,7 @@ export function AccountView({ user }: { user: AuthenticatedUser }) {
           </dd>
         </div>
       </dl>
+      <AnkiDeliveryView accountId={user.id} />
       <ReminderView />
       {logoutMutation.error ? (
         <p

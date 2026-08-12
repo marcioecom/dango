@@ -25,6 +25,10 @@ vi.mock("../../keychain", () => ({
   saveSessionToken: vi.fn(),
 }));
 
+vi.mock("../../../anki/ui/anki-delivery-view", () => ({
+  AnkiDeliveryView: () => null,
+}));
+
 const ana = {
   email: "ana@example.com",
   emailVerified: true,

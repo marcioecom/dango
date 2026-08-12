@@ -34,7 +34,10 @@ export function ReviewView({ captureId }: { captureId: string }) {
   if (capture.status === "generating" || !hasGeneration(capture)) {
     return <ReviewGenerateState capture={capture} retry />;
   }
-  if (capture.status === "approved" && capture.approval) {
+  if (
+    ["approved", "pending_anki", "sent_to_anki"].includes(capture.status) &&
+    capture.approval
+  ) {
     return <ReviewApprovedState sentence={capture.approval.sentence} text={capture.text} />;
   }
   return <ReviewForm capture={capture} />;
