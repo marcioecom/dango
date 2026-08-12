@@ -7,7 +7,7 @@ import {
 import { generateText, Output } from "ai";
 
 export const PROMPT_VERSION = "sentence-mining-v1";
-export const DEFAULT_MODEL = "openai/gpt-5-mini";
+export const DEFAULT_MODEL = "deepseek/deepseek-v4-flash-0731";
 export const FALLBACK_MODEL = "google/gemini-2.5-flash";
 
 const EXAMPLE_COUNT = 5;
@@ -28,7 +28,11 @@ export type SentenceGenerator = (input: {
     text: string;
   }>;
   timeoutMs: number;
-}) => Promise<{ model: string; outputs: Map<string, GenerationOutput>; usage: GenerationUsage }>;
+}) => Promise<{
+  model: string;
+  outputs: Map<string, GenerationOutput>;
+  usage: GenerationUsage;
+}>;
 
 const gatewayOptions = {
   models: [FALLBACK_MODEL],
@@ -62,24 +66,38 @@ export const generateSentenceOptions: SentenceGenerator = async (input) => {
 
   const outputs = new Map<string, GenerationOutput>();
   for (const item of result.output.items) {
-    if (outputs.has(item.captureId)) throw new Error("The generated output contains a duplicate capture.");
-    const capture = input.captures.find((candidate) => candidate.id === item.captureId);
+    if (outputs.has(item.captureId))
+      throw new Error("The generated output contains a duplicate capture.");
+    const capture = input.captures.find(
+      (candidate) => candidate.id === item.captureId,
+    );
     if (item.examples.length !== EXAMPLE_COUNT) {
-      throw new Error("The generated output must contain exactly five examples.");
+      throw new Error(
+        "The generated output must contain exactly five examples.",
+      );
     }
     if (capture?.kind === "sentence" && !item.sentenceTranslationPtBr) {
-      throw new Error("The generated output does not translate the captured sentence.");
+      throw new Error(
+        "The generated output does not translate the captured sentence.",
+      );
     }
     for (const example of item.examples) {
       if (!sentenceContainsTarget(example.sentenceEn, example.targetForm)) {
-        throw new Error("The generated target form is not present in its example.");
+        throw new Error(
+          "The generated target form is not present in its example.",
+        );
       }
     }
     const { captureId, ...output } = item;
     outputs.set(captureId, output);
   }
-  if (outputs.size !== input.captures.length || input.captures.some((capture) => !outputs.has(capture.id))) {
-    throw new Error("The generated output does not match the requested captures.");
+  if (
+    outputs.size !== input.captures.length ||
+    input.captures.some((capture) => !outputs.has(capture.id))
+  ) {
+    throw new Error(
+      "The generated output does not match the requested captures.",
+    );
   }
 
   const generationId = result.providerMetadata?.gateway?.generationId;
