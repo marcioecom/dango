@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("./http", () => ({ desktopFetch: vi.fn() }));
+
+import { desktopFetch } from "./http";
+
 describe("auth client", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -7,14 +11,13 @@ describe("auth client", () => {
   });
 
   it("sends the bearer token without cookie credentials", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(Response.json(null));
-    vi.stubGlobal("fetch", fetchMock);
+    vi.mocked(desktopFetch).mockResolvedValue(Response.json(null));
     const { authClient, setAuthToken } = await import("./auth-client");
     setAuthToken("session-token");
 
     await authClient.getSession();
 
-    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    const init = vi.mocked(desktopFetch).mock.calls[0][1] as RequestInit;
     expect(init.credentials).toBe("omit");
     expect(new Headers(init.headers).get("authorization")).toBe("Bearer session-token");
   });

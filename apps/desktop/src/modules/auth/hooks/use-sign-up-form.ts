@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { authBaseUrl, authClient } from "../../../lib/auth-client";
+import { authClient } from "../../../lib/auth-client";
 import { authRequest, responseError } from "../session";
 
 const signUpSchema = z.object({
@@ -25,7 +25,7 @@ export function useSignUpForm(onSuccess: () => void) {
       const { error } = await authRequest(() =>
         authClient.signUp.email({
           ...values,
-          callbackURL: `${authBaseUrl}/email-verified`,
+          callbackURL: "/email-verified",
         }),
       );
       if (error) throw responseError(error, "errors.signUp");

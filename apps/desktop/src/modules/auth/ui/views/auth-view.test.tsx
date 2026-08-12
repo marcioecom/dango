@@ -70,7 +70,7 @@ describe("desktop authentication", () => {
 
     expect(await screen.findByRole("heading", { name: "Confira seu email" })).toBeVisible();
     expect(authClient.signUp.email).toHaveBeenCalledWith({
-      callbackURL: "http://localhost:3000/email-verified",
+      callbackURL: "/email-verified",
       email: "ana@example.com",
       name: "Ana",
       password: "uma-senha-segura",

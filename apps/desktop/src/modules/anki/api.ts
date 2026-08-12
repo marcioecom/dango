@@ -6,6 +6,7 @@ import {
 import { z } from "zod";
 
 import { authBaseUrl, getAuthToken } from "../../lib/auth-client";
+import { desktopFetch } from "../../lib/http";
 
 const apiErrorSchema = z.object({
   code: z.string().optional(),
@@ -56,7 +57,7 @@ async function request(path: string, init?: RequestInit) {
 
   let response: Response;
   try {
-    response = await fetch(new URL(path, authBaseUrl), {
+    response = await desktopFetch(new URL(path, authBaseUrl), {
       ...init,
       credentials: "omit",
       headers: {

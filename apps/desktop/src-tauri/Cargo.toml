@@ -1,6 +1,6 @@
 [package]
 name = "dango-desktop"
-version = "0.1.0"
+version = "0.1.1"
 description = "Desktop macOS do Dango"
 authors = ["Leapstark"]
 edition = "2021"
@@ -29,6 +29,7 @@ tauri = { version = "2", features = [] }
 tauri-plugin-notification = "2.3.3"
 tauri-plugin-opener = "2"
 tempfile = "3"
+tauri-plugin-http = "2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 keyring = { version = "4.1.6", default-features = false, features = ["v1", "apple-native-keyring-store"] }

@@ -16,6 +16,8 @@ pnpm --filter @dango/web dev
 
 `AUTH_TRUSTED_ORIGINS` must explicitly contain the Vite development origin and the production Tauri origin. The allowlist stays exclusively on the server.
 
+The canonical production origin is `https://dango.marcio.run`. Set `BETTER_AUTH_URL` to this exact value in the production environment so authentication and email-verification links never depend on a Vercel deployment alias.
+
 ## Verification
 
 ```bash

@@ -1,12 +1,12 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Dango",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "com.leapstark.dango",
   "build": {
     "beforeDevCommand": "pnpm exec vite",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm build",
+    "beforeBuildCommand": "pnpm build:production",
     "frontendDist": "../dist"
   },
   "app": {
@@ -20,7 +20,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' http://localhost:3000 https://*.vercel.app; img-src 'self' asset: http://asset.localhost; style-src 'self' 'unsafe-inline'"
+      "csp": "default-src 'self'; connect-src 'self' http://localhost:3000 https://dango.marcio.run; img-src 'self' asset: http://asset.localhost; style-src 'self' 'unsafe-inline'"
     }
   },
   "bundle": {
