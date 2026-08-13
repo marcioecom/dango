@@ -7,9 +7,10 @@ import { captures, generations, generationUsages } from "@/db/schema/mining";
 
 import { getCapture, listCaptures } from "@/modules/mining/shared/server/captures";
 import { MiningError } from "@/modules/mining/shared/server/errors";
+import { InvalidGenerationOutputError } from "./generation-errors";
+import { PROMPT_VERSION } from "./generation-prompt";
 import {
   DEFAULT_MODEL,
-  PROMPT_VERSION,
   type SentenceGenerator,
 } from "./sentence-generator";
 
@@ -80,18 +81,23 @@ export async function generateCaptures(
     });
     return listCaptures(userId);
   } catch (error) {
+    const errorCode =
+      error instanceof InvalidGenerationOutputError
+        ? error.code
+        : "PROVIDER_FAILURE";
     await database.transaction(async (transaction) => {
       await transaction
         .update(generations)
-        .set({ completedAt: new Date(), errorCode: "PROVIDER_FAILURE", status: "failed" })
+        .set({ completedAt: new Date(), errorCode, status: "failed" })
         .where(and(eq(generations.userId, userId), inArray(generations.id, reserved.generations.map((item) => item.id))));
       await transaction
         .update(captures)
         .set({ status: "inbox", updatedAt: new Date() })
         .where(and(eq(captures.userId, userId), inArray(captures.id, captureIds)));
     });
-    console.error("[generation-batch] all models failed", {
+    console.error("[generation-batch] generation failed", {
       error: error instanceof Error ? error.message : "UnknownError",
+      errorCode,
       operationId,
     });
     throw new MiningError("GENERATION_FAILED", "A geração falhou. Suas capturas continuam na fila.", 502);

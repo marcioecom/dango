@@ -19,6 +19,8 @@ export default defineConfig({
       BETTER_AUTH_SECRET: "segredo-de-teste-com-mais-de-trinta-e-dois-caracteres",
       BETTER_AUTH_URL: "http://localhost:3000",
       DATABASE_URL: "postgres://postgres:postgres@localhost:5432/dango",
+      DEFAULT_MODEL: "openai/gpt-5-mini",
+      FALLBACK_MODEL: "google/gemini-2.5-flash",
       RESEND_API_KEY: "resend-key",
     },
     restoreMocks: true,

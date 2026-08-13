@@ -18,6 +18,7 @@ vi.mock("ai", () => ({
   Output: { object: mocks.outputObject },
 }));
 
+import { InvalidGenerationOutputError } from "./generation-errors";
 import {
   DEFAULT_MODEL,
   FALLBACK_MODEL,
@@ -82,5 +83,46 @@ describe("generateSentenceOptions", () => {
       outputTokens: 20,
       reportedCostUsd: "0.001",
     });
+  });
+
+  it("rejects examples whose target form is absent from the sentence", async () => {
+    const captureId = "f72e13df-b525-4f1d-a35d-8d9f2ad3ae63";
+    mocks.generateText.mockResolvedValue({
+      output: {
+        items: [
+          {
+            ambiguityNotePtBr: null,
+            captureId,
+            examples: Array.from({ length: 5 }, (_, index) => ({
+              sentenceEn: `Example ${index + 1} without it.`,
+              targetForm: "target",
+              translationPtBr: `Exemplo ${index + 1}.`,
+            })),
+            explanationPtBr: "Explicação",
+            originalSentenceTranslationPtBr: null,
+            sentenceTranslationPtBr: "Alvo.",
+            translationsPtBr: [],
+          },
+        ],
+      },
+      providerMetadata: {},
+      response: { modelId: DEFAULT_MODEL },
+      usage: { inputTokens: 10, outputTokens: 20 },
+    });
+
+    await expect(
+      generateSentenceOptions({
+        captures: [
+          {
+            id: captureId,
+            kind: "sentence",
+            originalSentence: null,
+            source: null,
+            text: "target",
+          },
+        ],
+        timeoutMs: 60_000,
+      }),
+    ).rejects.toBeInstanceOf(InvalidGenerationOutputError);
   });
 });
