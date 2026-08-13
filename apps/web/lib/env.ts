@@ -20,6 +20,8 @@ export const environmentSchema = z.object({
     ),
   AI_GATEWAY_API_KEY: z.string().min(1),
   RESEND_API_KEY: z.string().min(1),
+  DEFAULT_MODEL: z.string().min(1),
+  FALLBACK_MODEL: z.string().min(1),
 });
 
 export const env = environmentSchema.parse(process.env);

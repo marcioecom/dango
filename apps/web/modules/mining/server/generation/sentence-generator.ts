@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { gateway, type GatewayProviderOptions } from "@ai-sdk/gateway";
 import {
   generationBatchOutputSchema,
@@ -7,8 +8,8 @@ import {
 import { generateText, Output } from "ai";
 
 export const PROMPT_VERSION = "sentence-mining-v1";
-export const DEFAULT_MODEL = "deepseek/deepseek-v4-flash-0731";
-export const FALLBACK_MODEL = "google/gemini-2.5-flash";
+export const DEFAULT_MODEL = env.DEFAULT_MODEL;
+export const FALLBACK_MODEL = env.FALLBACK_MODEL;
 
 const EXAMPLE_COUNT = 5;
 
