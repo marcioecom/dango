@@ -1,15 +1,19 @@
 "use client";
 
+import type { Capture } from "@dango/domain";
 import { Button } from "@dango/ui/components/button";
 import { Skeleton } from "@dango/ui/components/skeleton";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCaptureList } from "../../hooks/use-capture-list";
 import type { CaptureListStatus } from "../../types";
+import { CaptureDetailDialog } from "./capture-detail-dialog";
 import { CaptureListItem } from "./capture-list-item";
 
 export function CaptureList({ status }: { status: CaptureListStatus }) {
   const { t } = useTranslation();
+  const [detailCapture, setDetailCapture] = useState<Capture | null>(null);
   const {
     captures,
     eligibleCaptures,
@@ -36,49 +40,72 @@ export function CaptureList({ status }: { status: CaptureListStatus }) {
       </h1>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">{hint}</p>
 
-      {status === "inbox" && readyCaptures.length > 0 ? (
-        <Button
-          className="mt-6"
-          type="button"
-          disabled={startSession.isPending}
-          onClick={startReviewSession}
-        >
-          {startSession.isPending
-            ? t("startingSession")
-            : t("startReviewSession", { count: readyCaptures.length })}
-        </Button>
-      ) : null}
-      {startSession.isError ? (
-        <p className="mt-3 text-sm text-destructive" role="alert">
-          {t("sessionStartError")}
-        </p>
-      ) : null}
-
-      {status === "inbox" && eligibleCaptures.length > 0 ? (
+      {status === "inbox" ? (
         <>
-          <div className="mt-6 flex flex-wrap items-center gap-2 border-y border-border py-3">
-            <Button
-              size="sm"
-              type="button"
-              variant="secondary"
-              disabled={generateMany.isPending}
-              onClick={generateAll}
-            >
-              {generateMany.isPending ? t("generating") : t("generateAll")}
-            </Button>
-            <Button
-              size="sm"
-              type="button"
-              variant="outline"
-              disabled={generateMany.isPending || selectedCaptureIds.length === 0}
-              onClick={generateSelected}
-            >
-              {t("generateSelected", { count: selectedCaptureIds.length })}
-            </Button>
+          <div className="mt-6 border-y border-border py-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <dl className="grid grid-cols-3 gap-x-4 gap-y-2 text-sm sm:flex-1 sm:gap-x-6">
+                <div>
+                  <dt className="text-muted-foreground">{t("inboxStatsToReview")}</dt>
+                  <dd className="font-semibold">{readyCaptures.length}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">{t("inboxStatsToGenerate")}</dt>
+                  <dd className="font-semibold">{eligibleCaptures.length}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">{t("inboxStatsTotal")}</dt>
+                  <dd className="font-semibold">{captures?.length ?? 0}</dd>
+                </div>
+              </dl>
+              {readyCaptures.length > 0 ? (
+                <Button
+                  className="w-full shrink-0 sm:w-auto"
+                  type="button"
+                  disabled={startSession.isPending}
+                  onClick={startReviewSession}
+                >
+                  {startSession.isPending
+                    ? t("startingSession")
+                    : t("startReviewSession", { count: readyCaptures.length })}
+                </Button>
+              ) : null}
+            </div>
+
+            {eligibleCaptures.length > 0 ? (
+              <>
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+                  <Button
+                    size="sm"
+                    type="button"
+                    variant="secondary"
+                    disabled={generateMany.isPending}
+                    onClick={generateAll}
+                  >
+                    {generateMany.isPending ? t("generating") : t("generateAll")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                    disabled={generateMany.isPending || selectedCaptureIds.length === 0}
+                    onClick={generateSelected}
+                  >
+                    {t("generateSelected", { count: selectedCaptureIds.length })}
+                  </Button>
+                </div>
+                {generateMany.isError ? (
+                  <p className="mt-3 text-sm text-destructive" role="alert">
+                    {t("generateError")}
+                  </p>
+                ) : null}
+              </>
+            ) : null}
           </div>
-          {generateMany.isError ? (
+
+          {startSession.isError ? (
             <p className="mt-3 text-sm text-destructive" role="alert">
-              {t("generateError")}
+              {t("sessionStartError")}
             </p>
           ) : null}
         </>
@@ -115,10 +142,18 @@ export function CaptureList({ status }: { status: CaptureListStatus }) {
               checked={selectedIds.has(capture.id)}
               key={capture.id}
               onCheckedChange={(checked) => toggleCapture(capture.id, checked)}
+              onOpenDetails={() => setDetailCapture(capture)}
               selectable={status === "inbox" && capture.status === "inbox"}
             />
           ))}
         </div>
+      ) : null}
+
+      {detailCapture ? (
+        <CaptureDetailDialog
+          capture={detailCapture}
+          onClose={() => setDetailCapture(null)}
+        />
       ) : null}
     </section>
   );
