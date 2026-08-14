@@ -75,9 +75,16 @@ export function CaptureListItem({
             </Button>
           ) : null}
           {capture.status === "generating" ? (
-            <Button className="shrink-0" size="sm" variant="outline" asChild>
-              <Link href={`/inbox/${capture.id}`}>{t("tryAgain")}</Link>
-            </Button>
+            <span
+              className="inline-flex h-9 shrink-0 items-center gap-2 text-sm font-medium text-muted-foreground"
+              role="status"
+            >
+              <span
+                aria-hidden="true"
+                className="size-1.5 shrink-0 rounded-full bg-primary motion-safe:animate-pulse"
+              />
+              {t("generating")}
+            </span>
           ) : null}
           {capture.status === "deferred" || capture.status === "discarded" ? (
             <Button

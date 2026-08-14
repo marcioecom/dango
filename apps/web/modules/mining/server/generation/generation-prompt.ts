@@ -1,4 +1,4 @@
-export const PROMPT_VERSION = "sentence-mining-v2";
+export const PROMPT_VERSION = "sentence-mining-v4";
 
 export const EXAMPLE_COUNT = 5;
 
@@ -10,19 +10,37 @@ export type GenerationCaptureInput = {
   text: string;
 };
 
-export function buildGenerationSystemPrompt() {
-  return [
-    "You create natural English sentence-mining material for a Brazilian Portuguese learner.",
-    "Choose one meaning for the target: the meaning established by the original sentence, or its most common meaning when no context is supplied.",
-    "Write a short Brazilian Portuguese explanation for that one meaning only. Do not enumerate unrelated meanings.",
-    "For a sentence capture, use sentenceTranslationPtBr for its full Brazilian Portuguese translation. For a term capture, return one or more Brazilian Portuguese translations as structured values, not a comma-separated sentence.",
-    "For a term capture with originalSentence, include originalSentenceTranslationPtBr.",
-    `Return exactly ${EXAMPLE_COUNT} varied, natural English examples. Each example must include the target or a grammatical inflection, identify the exact form used in targetForm, and include a Brazilian Portuguese translation.`,
-    "Use ambiguityNotePtBr only when context is absent and a brief clarification genuinely helps.",
-    "Return one item for every supplied captureId and do not omit or duplicate captureIds.",
-    "Every field is required: use null for ambiguityNotePtBr, originalSentenceTranslationPtBr, and sentenceTranslationPtBr when they do not apply, and an empty array for translationsPtBr when there are no translations.",
-    "Do not include markdown or commentary outside the structured output.",
-  ].join(" ");
+export const GENERATION_SYSTEM_PROMPT = `Create concise English sentence-mining material for a Brazilian Portuguese learner.
+
+# Meaning
+- Use the meaning established by originalSentence when present; otherwise use the target's most common meaning.
+- Explain exactly one meaning. Never mix or enumerate meanings.
+
+# Content
+- explanationPtBr: a brief Brazilian Portuguese paragraph about the chosen meaning.
+- translationsPtBr: for a term, short Brazilian Portuguese equivalents only; for a sentence, an empty array. Never include examples or explanations.
+- sentenceTranslationPtBr: full Brazilian Portuguese translation for a sentence; otherwise null.
+- originalSentenceTranslationPtBr: Brazilian Portuguese translation when a term has originalSentence; otherwise null.
+- examples: exactly 5 short, natural English sentences for the chosen meaning. Each must use the target or a grammatical inflection, name that exact substring in targetForm, and include a concise Brazilian Portuguese translation.
+- ambiguityNotePtBr: a brief clarification only when context is absent and it genuinely helps; otherwise null.
+
+# Output contract
+- Return one item per captureId. Never omit or duplicate items.
+- Return null for fields that do not apply.
+- Return only the structured output, without markdown or commentary.`;
+
+export const SENTENCE_GENERATION_SYSTEM_PROMPT = `Create one bilingual sentence-mining item for the supplied English sentence.
+
+Translate the full sentence naturally into Brazilian Portuguese and briefly explain its meaning. Identify the most useful reusable English word or expression that carries that meaning. Return exactly five short, natural, distinct English examples that teach that reusable expression in the same sense. Each example must record the exact form used in targetForm and include a natural Brazilian Portuguese translation.
+
+If the captured sentence is malformed or nonstandard, explain that briefly in ambiguityNotePtBr and teach the probable standard form instead of silently normalizing it.
+
+Return translationsPtBr as an empty array and originalSentenceTranslationPtBr as null. Return only the structured output.`;
+
+export function getGenerationSystemPrompt(kind: GenerationCaptureInput["kind"]) {
+  return kind === "sentence"
+    ? SENTENCE_GENERATION_SYSTEM_PROMPT
+    : GENERATION_SYSTEM_PROMPT;
 }
 
 export function buildGenerationPrompt(captures: GenerationCaptureInput[]) {

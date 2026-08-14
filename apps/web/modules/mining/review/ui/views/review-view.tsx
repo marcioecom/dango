@@ -9,6 +9,7 @@ import type { ReviewCapture } from "../../types";
 import { ReviewApprovedState } from "../components/review-approved-state";
 import { ReviewForm } from "../components/review-form";
 import { ReviewGenerateState } from "../components/review-generate-state";
+import { ReviewGeneratingState } from "../components/review-generating-state";
 
 function hasGeneration(capture: Capture): capture is ReviewCapture {
   return capture.generation !== null;
@@ -31,7 +32,10 @@ export function ReviewView({ captureId }: { captureId: string }) {
   if (capture.status === "inbox") {
     return <ReviewGenerateState capture={capture} />;
   }
-  if (capture.status === "generating" || !hasGeneration(capture)) {
+  if (capture.status === "generating") {
+    return <ReviewGeneratingState capture={capture} />;
+  }
+  if (!hasGeneration(capture)) {
     return <ReviewGenerateState capture={capture} retry />;
   }
   if (

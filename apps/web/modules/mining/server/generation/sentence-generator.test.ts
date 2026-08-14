@@ -19,6 +19,7 @@ vi.mock("ai", () => ({
 }));
 
 import { InvalidGenerationOutputError } from "./generation-errors";
+import { SENTENCE_GENERATION_SYSTEM_PROMPT } from "./generation-prompt";
 import {
   DEFAULT_MODEL,
   FALLBACK_MODEL,
@@ -71,7 +72,11 @@ describe("generateSentenceOptions", () => {
     expect(mocks.generateText).toHaveBeenCalledWith(
       expect.objectContaining({
         model: { model: DEFAULT_MODEL },
-        providerOptions: { gateway: { models: [FALLBACK_MODEL] } },
+        providerOptions: {
+          gateway: { models: [FALLBACK_MODEL] },
+          openai: { reasoningEffort: "low" },
+        },
+        system: SENTENCE_GENERATION_SYSTEM_PROMPT,
         timeout: 60_000,
       }),
     );

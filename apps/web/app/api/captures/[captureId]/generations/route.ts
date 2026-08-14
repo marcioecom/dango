@@ -10,6 +10,8 @@ import {
 import { withJsonAuth } from "@/server/auth";
 import { preflight } from "@/server/cors";
 
+export const maxDuration = 300;
+
 export const POST = withJsonAuth(async (request, { params, user }) => {
   const parsed = createGenerationSchema.safeParse(
     await parseJsonRequest(request),
@@ -40,7 +42,7 @@ export const POST = withJsonAuth(async (request, { params, user }) => {
     generateSentenceOptions,
   );
 
-  return Response.json(capture);
+  return Response.json(capture, { status: 202 });
 });
 
 export const OPTIONS = preflight;

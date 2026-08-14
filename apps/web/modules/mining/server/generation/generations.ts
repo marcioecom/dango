@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 
+import type { Capture } from "@dango/domain";
 import { and, eq, inArray } from "drizzle-orm";
+import { after } from "next/server";
 
 import { database } from "@/db/runtime";
 import { captures, generations, generationUsages } from "@/db/schema/mining";
@@ -9,12 +11,23 @@ import { getCapture, listCaptures } from "@/modules/mining/shared/server/capture
 import { MiningError } from "@/modules/mining/shared/server/errors";
 import { InvalidGenerationOutputError } from "./generation-errors";
 import { PROMPT_VERSION } from "./generation-prompt";
-import {
-  DEFAULT_MODEL,
-  type SentenceGenerator,
-} from "./sentence-generator";
+import { DEFAULT_MODEL, type SentenceGenerator } from "./sentence-generator";
 
+const generationConcurrency = 4;
 const generationTimeoutMs = 60_000;
+
+type ReservedGeneration = { captureId: string; id: string };
+
+type ReservedBatch = {
+  captures: Array<{
+    id: string;
+    kind: string;
+    originalSentence: string | null;
+    source: string | null;
+    text: string;
+  }>;
+  generations: ReservedGeneration[];
+};
 
 export async function generateCapture(
   userId: string,
@@ -35,76 +48,129 @@ export async function generateCaptures(
   const reserved = await reserve(userId, captureIds, operationId);
   if (!reserved) return listCaptures(userId);
 
-  try {
-    const result = await generator({
-      captures: reserved.captures.map((capture) => ({
-        ...capture,
-        kind: capture.kind as "sentence" | "term",
-      })),
-      timeoutMs: generationTimeoutMs,
-    });
-    const completedAt = new Date();
-    await database.transaction(async (transaction) => {
-      for (const item of reserved.generations) {
-        const output = result.outputs.get(item.captureId);
-        if (!output) throw new MiningError("INVALID_GENERATION", "A resposta não contém todos os itens.", 502);
-        await transaction
-          .update(generations)
-          .set({
-            ambiguityNotePtBr: output.ambiguityNotePtBr,
-            completedAt,
-            errorCode: null,
-            examples: output.examples,
-            explanationPtBr: output.explanationPtBr,
-            model: result.model,
-            originalSentenceTranslationPtBr: output.originalSentenceTranslationPtBr,
-            sentenceTranslationPtBr: output.sentenceTranslationPtBr,
-            status: "succeeded",
-            translationsPtBr: output.translationsPtBr,
-          })
-          .where(and(eq(generations.id, item.id), eq(generations.userId, userId), eq(generations.status, "running")));
-      }
-      await transaction.insert(generationUsages).values({
-        generationId: reserved.generations[0].id,
-        inputTokens: result.usage.inputTokens,
-        latencyMs: result.usage.latencyMs,
-        model: result.model,
-        outcome: "succeeded",
-        outputTokens: result.usage.outputTokens,
-        reportedCostUsd: result.usage.reportedCostUsd,
-        userId,
-      });
-      await transaction
-        .update(captures)
-        .set({ status: "ready_for_review", updatedAt: completedAt })
-        .where(and(eq(captures.userId, userId), inArray(captures.id, captureIds)));
-    });
-    return listCaptures(userId);
-  } catch (error) {
-    const errorCode =
-      error instanceof InvalidGenerationOutputError
-        ? error.code
-        : "PROVIDER_FAILURE";
-    await database.transaction(async (transaction) => {
-      await transaction
-        .update(generations)
-        .set({ completedAt: new Date(), errorCode, status: "failed" })
-        .where(and(eq(generations.userId, userId), inArray(generations.id, reserved.generations.map((item) => item.id))));
-      await transaction
-        .update(captures)
-        .set({ status: "inbox", updatedAt: new Date() })
-        .where(and(eq(captures.userId, userId), inArray(captures.id, captureIds)));
-    });
-    console.error("[generation-batch] generation failed", {
-      error: error instanceof Error ? error.message : "UnknownError",
-      errorCode,
-      operationId,
-    });
-    throw new MiningError("GENERATION_FAILED", "A geração falhou. Suas capturas continuam na fila.", 502);
-  }
+  after(() => runGeneration(userId, reserved, generator));
+  return listCaptures(userId);
 }
 
-async function reserve(userId: string, captureIds: string[], operationId: string) {
+export async function runGeneration(
+  userId: string,
+  reserved: ReservedBatch,
+  generator: SentenceGenerator,
+) {
+  const generationIdByCapture = new Map(
+    reserved.generations.map((item) => [item.captureId, item.id]),
+  );
+  await runWithConcurrency(
+    reserved.captures,
+    generationConcurrency,
+    async (capture) => {
+      const generationId = generationIdByCapture.get(capture.id);
+      if (!generationId) return;
+      try {
+        const result = await generator({
+          captures: [
+            { ...capture, kind: capture.kind as Capture["kind"] },
+          ],
+          timeoutMs: generationTimeoutMs,
+        });
+        const output = result.outputs.get(capture.id);
+        if (!output) {
+          throw new InvalidGenerationOutputError(
+            "A resposta não contém todos os itens.",
+          );
+        }
+        const completedAt = new Date();
+        await database.transaction(async (transaction) => {
+          await transaction
+            .update(generations)
+            .set({
+              ambiguityNotePtBr: output.ambiguityNotePtBr,
+              completedAt,
+              errorCode: null,
+              examples: output.examples,
+              explanationPtBr: output.explanationPtBr,
+              model: result.model,
+              originalSentenceTranslationPtBr:
+                output.originalSentenceTranslationPtBr,
+              sentenceTranslationPtBr: output.sentenceTranslationPtBr,
+              status: "succeeded",
+              translationsPtBr: output.translationsPtBr,
+            })
+            .where(
+              and(
+                eq(generations.id, generationId),
+                eq(generations.userId, userId),
+                eq(generations.status, "running"),
+              ),
+            );
+          await transaction.insert(generationUsages).values({
+            generationId,
+            inputTokens: result.usage.inputTokens,
+            latencyMs: result.usage.latencyMs,
+            model: result.model,
+            outcome: "succeeded",
+            outputTokens: result.usage.outputTokens,
+            reportedCostUsd: result.usage.reportedCostUsd,
+            userId,
+          });
+          await transaction
+            .update(captures)
+            .set({ status: "ready_for_review", updatedAt: completedAt })
+            .where(and(eq(captures.userId, userId), eq(captures.id, capture.id)));
+        });
+      } catch (error) {
+        const errorCode =
+          error instanceof InvalidGenerationOutputError
+            ? error.code
+            : "PROVIDER_FAILURE";
+        await database.transaction(async (transaction) => {
+          await transaction
+            .update(generations)
+            .set({
+              completedAt: new Date(),
+              errorCode,
+              status: "failed",
+            })
+            .where(
+              and(
+                eq(generations.id, generationId),
+                eq(generations.userId, userId),
+              ),
+            );
+          await transaction
+            .update(captures)
+            .set({ status: "inbox", updatedAt: new Date() })
+            .where(and(eq(captures.userId, userId), eq(captures.id, capture.id)));
+        });
+        console.error("[generation] capture generation failed", {
+          captureId: capture.id,
+          error: error instanceof Error ? error.message : "UnknownError",
+          errorCode,
+        });
+      }
+    },
+  );
+}
+
+export async function runWithConcurrency<T>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<void>,
+) {
+  const queue = [...items];
+  const lanes = Array.from(
+    { length: Math.min(concurrency, queue.length) },
+    async () => {
+      let item: T | undefined;
+      while ((item = queue.shift()) !== undefined) {
+        await worker(item);
+      }
+    },
+  );
+  await Promise.all(lanes);
+}
+
+async function reserve(userId: string, captureIds: string[], operationId: string): Promise<ReservedBatch | null> {
   const [existing] = await database
     .select({ captureId: generations.captureId, status: generations.status })
     .from(generations)

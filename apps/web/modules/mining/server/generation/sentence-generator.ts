@@ -11,7 +11,7 @@ import {
 } from "./generation-output-schema";
 import {
   buildGenerationPrompt,
-  buildGenerationSystemPrompt,
+  getGenerationSystemPrompt,
   type GenerationCaptureInput,
 } from "./generation-prompt";
 import { fetchReportedCostUsd } from "./generation-telemetry";
@@ -39,13 +39,17 @@ const gatewayOptions = {
   models: [FALLBACK_MODEL],
 } satisfies GatewayProviderOptions;
 
+const openaiOptions = {
+  reasoningEffort: "low",
+} as const;
+
 export const generateSentenceOptions: SentenceGenerator = async (input) => {
   const startedAt = performance.now();
   const result = await generateText({
     model: gateway(DEFAULT_MODEL),
     output: Output.object({ schema: generationResponseSchema }),
-    providerOptions: { gateway: gatewayOptions },
-    system: buildGenerationSystemPrompt(),
+    providerOptions: { gateway: gatewayOptions, openai: openaiOptions },
+    system: getGenerationSystemPrompt(input.captures[0]?.kind ?? "term"),
     prompt: buildGenerationPrompt(input.captures),
     timeout: input.timeoutMs,
   });

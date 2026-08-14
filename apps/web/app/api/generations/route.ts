@@ -14,6 +14,8 @@ const batchSchema = z.object({
   id: z.uuid(),
 });
 
+export const maxDuration = 300;
+
 export const POST = withJsonAuth(async (request, { user }) => {
   const parsed = batchSchema.safeParse(await parseJsonRequest(request));
   if (!parsed.success)
@@ -30,7 +32,7 @@ export const POST = withJsonAuth(async (request, { user }) => {
     generateSentenceOptions,
   );
 
-  return Response.json(captures);
+  return Response.json(captures, { status: 202 });
 });
 
 export const OPTIONS = preflight;

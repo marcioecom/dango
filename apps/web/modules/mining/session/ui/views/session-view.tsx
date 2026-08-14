@@ -2,6 +2,7 @@
 
 import { Button } from "@dango/ui/components/button";
 import { Skeleton } from "@dango/ui/components/skeleton";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useMiningSession } from "../../hooks/use-mining-session";
@@ -18,6 +19,15 @@ export function SessionView({ sessionId }: { sessionId: string }) {
     session,
     sessionCaptures,
   } = useMiningSession(sessionId);
+
+  const currentId = current?.id ?? null;
+  useEffect(() => {
+    if (currentId === null) return;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "instant" : "smooth" });
+  }, [currentId]);
 
   if (
     (session.isLoading && !session.data) ||
