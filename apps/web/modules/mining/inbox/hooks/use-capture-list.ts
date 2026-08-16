@@ -8,7 +8,6 @@ import { useState } from "react";
 import { createMiningSession, generateCaptures } from "@/modules/mining/shared/hooks/api";
 import { miningQueryKeys } from "@/modules/mining/shared/hooks/query-keys";
 import { capturesQuery } from "@/modules/mining/shared/hooks/queries";
-import type { CaptureListStatus } from "../types";
 
 const inboxStatuses: Capture["status"][] = [
   "inbox",
@@ -18,16 +17,12 @@ const inboxStatuses: Capture["status"][] = [
   "discarded",
 ];
 
-export function useCaptureList(status: CaptureListStatus) {
+export function useCaptureList() {
   const query = useQuery(capturesQuery);
   const queryClient = useQueryClient();
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const captures = query.data?.captures.filter((capture) =>
-    status === "mined"
-      ? ["approved", "pending_anki", "sent_to_anki"].includes(capture.status)
-      : inboxStatuses.includes(capture.status),
-  );
+  const captures = query.data?.captures.filter((capture) => inboxStatuses.includes(capture.status));
   const eligibleCaptures = captures?.filter((capture) => capture.status === "inbox") ?? [];
   const readyCaptures = captures?.filter((capture) => capture.status === "ready_for_review") ?? [];
   const selectedCaptureIds = eligibleCaptures
