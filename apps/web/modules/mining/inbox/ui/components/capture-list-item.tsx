@@ -12,11 +12,13 @@ export function CaptureListItem({
   capture,
   checked,
   onCheckedChange,
+  onOpenDetails,
   selectable,
 }: {
   capture: Capture;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
+  onOpenDetails: () => void;
   selectable: boolean;
 }) {
   const { t } = useTranslation();
@@ -46,7 +48,15 @@ export function CaptureListItem({
           />
         ) : null}
         <div className="min-w-0">
-          <h3 className="font-semibold break-words">{capture.text}</h3>
+          <h3>
+            <button
+              className="font-semibold break-words text-left underline-offset-4 hover:underline focus-visible:underline"
+              onClick={onOpenDetails}
+              type="button"
+            >
+              {capture.text}
+            </button>
+          </h3>
           <p className="mt-1 text-xs font-medium text-muted-foreground">
             {status}
           </p>

@@ -1,9 +1,10 @@
 import type { ApprovalSource, Capture, CreateCaptureInput } from "@dango/domain";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, lt, or } from "drizzle-orm";
 
 import { database } from "@/db/runtime";
 import { approvals, captures, generations } from "@/db/schema/mining";
 import { MiningError } from "./errors";
+import { decodeMinedCursor, encodeMinedCursor, escapeIlikePattern } from "./mined-cursor";
 
 export function normalizeCaptureText(value: string) {
   return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
@@ -55,6 +56,64 @@ export async function listCaptures(userId: string): Promise<Capture[]> {
     .where(eq(captures.userId, userId))
     .orderBy(desc(captures.updatedAt));
 
+  return hydrateCaptures(userId, rows);
+}
+
+export type MinedCaptureStatus = "approved" | "pending_anki" | "sent_to_anki";
+
+const minedStatuses: MinedCaptureStatus[] = ["approved", "pending_anki", "sent_to_anki"];
+const defaultMinedLimit = 20;
+const maxMinedLimit = 50;
+
+export async function listMinedCaptures(
+  userId: string,
+  filters: {
+    search?: string;
+    status?: MinedCaptureStatus;
+    cursor?: string;
+    limit?: number;
+  },
+): Promise<{ captures: Capture[]; nextCursor: string | null }> {
+  const limit = Math.min(Math.max(filters.limit ?? defaultMinedLimit, 1), maxMinedLimit);
+  const conditions = [eq(captures.userId, userId), inArray(captures.status, minedStatuses)];
+
+  if (filters.status) {
+    conditions.push(eq(captures.status, filters.status));
+  }
+
+  const search = filters.search?.trim();
+  if (search) {
+    conditions.push(ilike(captures.text, `%${escapeIlikePattern(search)}%`));
+  }
+
+  if (filters.cursor) {
+    const cursor = decodeMinedCursor(filters.cursor);
+    const keyset = or(
+      lt(captures.updatedAt, cursor.updatedAt),
+      and(eq(captures.updatedAt, cursor.updatedAt), lt(captures.id, cursor.id)),
+    );
+    if (keyset) {
+      conditions.push(keyset);
+    }
+  }
+
+  const rows = await database
+    .select()
+    .from(captures)
+    .where(and(...conditions))
+    .orderBy(desc(captures.updatedAt), desc(captures.id))
+    .limit(limit + 1);
+
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows;
+  const last = page.at(-1);
+  const nextCursor =
+    hasMore && last ? encodeMinedCursor({ id: last.id, updatedAt: last.updatedAt }) : null;
+
+  return { captures: await hydrateCaptures(userId, page), nextCursor };
+}
+
+async function hydrateCaptures(userId: string, rows: CaptureRow[]): Promise<Capture[]> {
   if (rows.length === 0) {
     return [];
   }

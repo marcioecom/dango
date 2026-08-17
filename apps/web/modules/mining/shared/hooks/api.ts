@@ -16,6 +16,26 @@ export async function listCaptures() {
   return request<{ captures: Capture[] }>("/api/captures");
 }
 
+export type MinedCapturesPage = {
+  captures: Capture[];
+  nextCursor: string | null;
+};
+
+export async function listMinedCaptures(filters: {
+  search?: string;
+  status?: string;
+  cursor?: string | null;
+}) {
+  const params = new URLSearchParams();
+  if (filters.search) params.set("search", filters.search);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.cursor) params.set("cursor", filters.cursor);
+  const queryString = params.toString();
+  return request<MinedCapturesPage>(
+    `/api/captures/mined${queryString ? `?${queryString}` : ""}`,
+  );
+}
+
 export async function saveCapture(input: CreateCaptureInput) {
   return request<Capture>("/api/captures", {
     body: JSON.stringify(input),

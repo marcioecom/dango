@@ -1,5 +1,5 @@
-import { CaptureList } from "../components/capture-list";
+import { MinedList } from "../components/mined-list";
 
 export function MinedView() {
-  return <CaptureList status="mined" />;
+  return <MinedList />;
 }
